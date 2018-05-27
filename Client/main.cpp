@@ -1,13 +1,14 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <iostream>
+#include <string>
 #include "Socket.h"
 #include "WindowsSocket.h"
 using namespace std;
 
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 1050
 #define DEFAULT_PORT "5007"
-#define DEFAULT_HOST "192.168.43.114"
+#define DEFAULT_HOST "192.168.43.49"
 
 int main(int argc, char **argv)
 {
@@ -16,7 +17,7 @@ int main(int argc, char **argv)
 	SOCKET socket = INVALID_SOCKET;
 
 	struct addrinfo *result = NULL, hints;
-	char *sendbuf = "this is a test";
+	char *sendbuf = "this is a test14";
 	char recvbuf[DEFAULT_BUFLEN];
 	int iResult;
 	int recvbuflen = DEFAULT_BUFLEN;
@@ -81,11 +82,14 @@ int main(int argc, char **argv)
 		do {
 			try
 			{
+				char recvbuf[DEFAULT_BUFLEN];
 				iResult = clientSocket.receive(socket, recvbuf, recvbuflen);
 				if (iResult > 0)
 				{
+					string buf = string(recvbuf);
+					int meessageLen = atoi((buf.substr(strlen(recvbuf) - 2)).c_str());
 					printf("Bytes received: %d\n", iResult);
-					cout << recvbuf;
+					cout << buf.substr(0, meessageLen -1);
 				}
 			}
 			catch (exception ex)

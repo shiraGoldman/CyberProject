@@ -71,9 +71,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\admin\Documents\Project\CyberProject\Client;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\admin\Downloads\סיכומים\libprotobuf-master\libprotobuf-master\lib\vs2015win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>C:\Users\admin\Downloads\סיכומים\libprotobuf-master\libprotobuf-master\lib\vs2015win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
