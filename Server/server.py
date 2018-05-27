@@ -1,10 +1,35 @@
 #!/usr/bin/env python
-
 import socket
 
-if __name__ == '__main__':
+# message Packet
+# {
+#      required int32 seqNumber = 1;
+#      required Opcode opcode = 2;
+#      required bool isLast = 3;
+#      required bytes content = 4;
+#      required int len = 5
+# }
 
-    TCP_IP = '192.168.43.114'
+
+PACKET_FORMAT = "TS%s01%s%s%s"
+PACKET_INITIAL_SIZE = 8
+FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
+CHUNK_SIZE = 1024
+
+
+def bin_file_to_buffer(file_path):
+    """Lazy function (generator) to read a file piece by piece.
+    Default chunk size: 1k."""
+    with open(file_path, 'rb') as fp:
+        while True:
+            data = fp.read(CHUNK_SIZE)
+            if not data:
+                break
+            yield data
+
+
+if __name__ == '__main__':
+    TCP_IP = '192.168.43.49'
     TCP_PORT = 5007
     BUFFER_SIZE = 1024
 
@@ -22,4 +47,11 @@ if __name__ == '__main__':
         data = data  # + '\0'.encode()
         conn.send(data)
 
+        i = 0
+        is_last = 0
+        for chunk in bin_file_to_buffer(FILE_PATH):
+            packet = PACKET_FORMAT % (format(i, '02d'), format(is_last, '02d'), chunk, PACKET_INITIAL_SIZE+len(chunk))
+            conn.send(packet.encode())
+            break
+            i += 1
     conn.close()
