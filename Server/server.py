@@ -12,6 +12,7 @@ import socket
 
 
 FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
+EXE_STR = "netstat -a -n -o"
 CHUNK_SIZE = 1024
 
 
@@ -55,6 +56,19 @@ if __name__ == '__main__':
             conn.send(packet)
             data = conn.recv(BUFFER_SIZE)  # ok for packgae
         conn.send("END_UPDATE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+
+        # Execute
+        conn.send("EXECUTE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        packet = EXE_STR
+        conn.send(packet)
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # get response
+
+
+
+        conn.send("END_EXECUTE".encode())
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
     conn.close()
