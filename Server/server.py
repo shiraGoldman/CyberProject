@@ -65,8 +65,8 @@ if __name__ == '__main__':
         conn.send(packet)
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
         # get response
-
-
+        data = conn.recv(BUFFER_SIZE)
+        print(data)
 
         conn.send("END_EXECUTE".encode())
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
