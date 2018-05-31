@@ -17,6 +17,34 @@ std::ofstream openFile(char *file_path)
 	return f2;
 }
 
+void create_file(Socket clientSocket,SOCKET socket, char* recBuf, int iResult)
+{
+	char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
+	std::ofstream clientFile = openFile(filePath);
+	int iResult2;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+
+	do
+	{
+		//char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
+		memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
+		iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+		iResult2 = clientSocket.send_data(socket, "ok");
+		if ((strcmp(recvbuf, "END_UPDATE") != 0))
+		{
+			clientFile.write(recvbuf, iResult);
+			printf("Bytes received: %d\n", iResult);
+		}
+		
+	} while (strcmp(recvbuf, "END_UPDATE") != 0);
+
+	
+	if (!strcmp(recvbuf, "END_UPDATE"))
+	{
+		clientFile.close();
+		cout << "closed the file" << endl;
+	}	
+}
 
 int main(int argc, char **argv)
 {
@@ -29,7 +57,6 @@ int main(int argc, char **argv)
 	char recvbuf[DEFAULT_BUFLEN];
 	int iResult, iResult2;
 	int recvbuflen = DEFAULT_BUFLEN;
-	std::ofstream clientFile;
 
 	// Initialize Winsock
 	try
@@ -67,45 +94,34 @@ int main(int argc, char **argv)
 
 		freeaddrinfo(result);
 
-		/*if (ConnectSocket == INVALID_SOCKET) {
-			printf("Unable to connect to server!\n");
-			WSACleanup();
-			return 1;
-		}*/
-
 		// Send an initial buffer
 		iResult = clientSocket.send_data(socket, sendbuf);
 
 		printf("Bytes Sent: %ld\n", iResult);
 
-		// shutdown the connection since no more data will be sent
-		////iResult = shutdown(ConnectSocket, SD_SEND);
-		//if (iResult == SOCKET_ERROR) {
-		//	printf("shutdown failed with error: %d\n", WSAGetLastError());
-		//	closesocket(ConnectSocket);
-		//	WSACleanup();
-		//	return 1;
-		//}
-
-		char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
-		clientFile = openFile(filePath);
-
 		// Receive until the peer closes the connection
 		do {
 			try
 			{
-				char recvbuf[DEFAULT_BUFLEN * 4];
+				char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
 				iResult = clientSocket.receive(socket, recvbuf, recvbuflen*4);
+				iResult2 = clientSocket.send_data(socket, "ok");
 				if (iResult > 0)
 				{
-					string buf = string(recvbuf);
-					int length = strlen(recvbuf);
-					printf("Bytes received: %d\n", iResult);
-					cout << buf.substr(0, iResult);
-					iResult2 = clientSocket.send_data(socket, "ok");
-					for (int i = 0; i < iResult; i++)
+
+					//string buf = string(recvbuf);
+					//cout << buf.substr(0, iResult);
+
+					if (!strcmp(recvbuf, "UPDATE"))
 					{
-						clientFile << recvbuf[i];
+						create_file(clientSocket, socket, recvbuf, iResult);
+					}
+					else
+					{
+						printf("Bytes received: %d\n", iResult);
+						//iResult2 = clientSocket.send_data(socket, "ok");
+						string buf = string(recvbuf);
+						cout << buf.substr(0, iResult);
 					}
 				}
 			}
@@ -118,6 +134,7 @@ int main(int argc, char **argv)
 		} while (iResult > 0);
 
 		// cleanup
+
 		clientSocket.close(socket);
 		windowsSocket.cleanup();
 		return 0;

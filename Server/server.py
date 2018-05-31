@@ -11,8 +11,6 @@ import socket
 # }
 
 
-PACKET_FORMAT = "TS%s01%s%s%s"
-PACKET_INITIAL_SIZE = 8
 FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
 CHUNK_SIZE = 1024
 
@@ -44,19 +42,19 @@ if __name__ == '__main__':
         data = conn.recv(BUFFER_SIZE)
         if not data: break
         print('received data:', data)
-        data = data  # + '\0'.encode()
+        data = data
         conn.send(data)
-        data = conn.recv(BUFFER_SIZE)#ok for packgae
-		
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        i = 0
-        is_last = 0
+        # UPDATE:
+        conn.send("UPDATE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
         for chunk in bin_file_to_buffer(FILE_PATH):
-            #packet = PACKET_FORMAT % (format(i, '02d'), format(is_last, '02d'), chunk, PACKET_INITIAL_SIZE+len(chunk))
-            #print(packet.encode())
             packet = chunk
+            print(packet)
             conn.send(packet)
-            data = conn.recv(BUFFER_SIZE)#ok for packgae
-            ##break
-            i += 1
+            data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        conn.send("END_UPDATE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+
     conn.close()
