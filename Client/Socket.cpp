@@ -43,7 +43,7 @@ bool Socket::conn(SOCKET socket)
 /**
 Send data to the connected host
 */
-int Socket::send_data(SOCKET socket, char* message)
+int Socket::send_data(SOCKET socket, const char* message)
 {
 	int result = send(socket, message, (int)strlen(message), 0);
 	if (result == SOCKET_ERROR) {

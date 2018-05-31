@@ -26,7 +26,7 @@ public:
 	SOCKET create();
 	void close(SOCKET);
 	bool conn(SOCKET);
-	int send_data(SOCKET, char*);
+	int send_data(SOCKET, const char*);
 	int receive(SOCKET, char*, int);
 };
 

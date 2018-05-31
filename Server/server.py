@@ -47,27 +47,28 @@ if __name__ == '__main__':
         conn.send(data)
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        # UPDATE:
-        conn.send("UPDATE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        for chunk in bin_file_to_buffer(FILE_PATH):
-            packet = chunk
-            print(packet)
-            conn.send(packet)
-            data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        conn.send("END_UPDATE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # # UPDATE:
+        # conn.send("UPDATE".encode())
+        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # for chunk in bin_file_to_buffer(FILE_PATH):
+        #     packet = chunk
+        #     print(packet)
+        #     conn.send(packet)
+        #     data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # conn.send("END_UPDATE".encode())
+        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
         # Execute
         conn.send("EXECUTE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        data = conn.recv(2)  # ok for packgae
         packet = EXE_STR
-        conn.send(packet)
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        conn.send(packet.encode())
+        data = conn.recv(2)  # ok for packgae
         # get response
-        data = conn.recv(BUFFER_SIZE)
-        print(data)
-
+        data = conn.recv(BUFFER_SIZE*100)
+        conn.send("OK".encode())
+        print("hsgfasygdfjksd")
+        print(data.decode())#TODO handle /n
         conn.send("END_EXECUTE".encode())
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 

