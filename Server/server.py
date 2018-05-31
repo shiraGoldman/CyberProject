@@ -22,15 +22,15 @@ def bin_file_to_buffer(file_path):
     Default chunk size: 1k."""
     with open(file_path, 'rb') as fp:
         while True:
-            data = fp.read(CHUNK_SIZE)
-            if not data:
+            data1 = fp.read(CHUNK_SIZE)
+            if not data1:
                 break
-            yield data
+            yield data1
 
 
 if __name__ == '__main__':
-    TCP_IP = '192.168.43.49'
-    TCP_PORT = 5007
+    TCP_IP = '10.7.0.70'
+    TCP_PORT = 5003
     BUFFER_SIZE = 1024
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,15 +43,20 @@ if __name__ == '__main__':
     while 1:
         data = conn.recv(BUFFER_SIZE)
         if not data: break
-        print('recieved data:', data)
+        print('received data:', data)
         data = data  # + '\0'.encode()
         conn.send(data)
+        data = conn.recv(BUFFER_SIZE)#ok for packgae
+		
 
         i = 0
         is_last = 0
         for chunk in bin_file_to_buffer(FILE_PATH):
-            packet = PACKET_FORMAT % (format(i, '02d'), format(is_last, '02d'), chunk, PACKET_INITIAL_SIZE+len(chunk))
-            conn.send(packet.encode())
-            break
+            #packet = PACKET_FORMAT % (format(i, '02d'), format(is_last, '02d'), chunk, PACKET_INITIAL_SIZE+len(chunk))
+            #print(packet.encode())
+            packet = chunk
+            conn.send(packet)
+            data = conn.recv(BUFFER_SIZE)#ok for packgae
+            ##break
             i += 1
     conn.close()

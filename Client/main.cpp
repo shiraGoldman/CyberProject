@@ -2,13 +2,21 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "Socket.h"
 #include "WindowsSocket.h"
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5007"
-#define DEFAULT_HOST "192.168.43.49"
+#define DEFAULT_PORT "5003"
+#define DEFAULT_HOST "10.7.0.70"
+
+std::ofstream openFile(char *file_path)
+{
+	std::ofstream f2(file_path, std::fstream::binary);
+	return f2;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -19,8 +27,9 @@ int main(int argc, char **argv)
 	struct addrinfo *result = NULL, hints;
 	char *sendbuf = "this is a test14";
 	char recvbuf[DEFAULT_BUFLEN];
-	int iResult;
+	int iResult, iResult2;
 	int recvbuflen = DEFAULT_BUFLEN;
+	std::ofstream clientFile;
 
 	// Initialize Winsock
 	try
@@ -78,18 +87,26 @@ int main(int argc, char **argv)
 		//	return 1;
 		//}
 
+		char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
+		clientFile = openFile(filePath);
+
 		// Receive until the peer closes the connection
 		do {
 			try
 			{
-				char recvbuf[DEFAULT_BUFLEN];
-				iResult = clientSocket.receive(socket, recvbuf, recvbuflen);
+				char recvbuf[DEFAULT_BUFLEN * 4];
+				iResult = clientSocket.receive(socket, recvbuf, recvbuflen*4);
 				if (iResult > 0)
 				{
 					string buf = string(recvbuf);
-					int meessageLen = atoi((buf.substr(strlen(recvbuf) - 2)).c_str());
+					int length = strlen(recvbuf);
 					printf("Bytes received: %d\n", iResult);
-					cout << buf.substr(0, meessageLen -1);
+					cout << buf.substr(0, iResult);
+					iResult2 = clientSocket.send_data(socket, "ok");
+					for (int i = 0; i < iResult; i++)
+					{
+						clientFile << recvbuf[i];
+					}
 				}
 			}
 			catch (exception ex)
