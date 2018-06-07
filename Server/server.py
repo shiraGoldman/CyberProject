@@ -13,8 +13,8 @@ import socket
 
 FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
 EXE_STR = "netstat -a -n -o"
-NEW_IP = "10.7.0.89"
-NEW_PORT = 4000
+NEW_IP = "192.168.43.49"
+NEW_PORT = 4001
 CHUNK_SIZE = 1024
 
 
@@ -30,8 +30,8 @@ def bin_file_to_buffer(file_path):
 
 
 if __name__ == '__main__':
-    TCP_IP = '10.7.0.70'
-    TCP_PORT = 5003
+    TCP_IP = '127.0.0.1'
+    TCP_PORT = 5004
     BUFFER_SIZE = 1024
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,39 +49,49 @@ if __name__ == '__main__':
         conn.send(data)
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        # UPDATE:
-        conn.send("UPDATE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        for chunk in bin_file_to_buffer(FILE_PATH):
-            packet = chunk
-            print(packet)
-            conn.send(packet)
-            data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        conn.send("END_UPDATE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # # UPDATE:
+        # conn.send("UPDATE".encode())
+        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # for chunk in bin_file_to_buffer(FILE_PATH):
+        #     packet = chunk
+        #     print(packet)
+        #     conn.send(packet)
+        #     data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # conn.send("END_UPDATE".encode())
+        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        # Execute
-        conn.send("EXECUTE".encode())
+        # # Execute
+        # conn.send("EXECUTE".encode())
+        # data = conn.recv(2)  # ok for packgae
+        # packet = EXE_STR
+        # conn.send(packet.encode())
+        # data = conn.recv(2)  # ok for packgae
+        # # get response
+        # data = conn.recv(BUFFER_SIZE * 100)
+        # conn.send("OK".encode())
+        # print("hsgfasygdfjksd")
+        # print(data.decode())  # TODO handle /n
+        # conn.send("END_EXECUTE".encode())
+        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+
+        # file system info
+        conn.send("FILE_SYSTEM_INFO".encode())
         data = conn.recv(2)  # ok for packgae
-        packet = EXE_STR
-        conn.send(packet.encode())
-        data = conn.recv(2)  # ok for packgae
-        # get response
-        data = conn.recv(BUFFER_SIZE * 100)
-        conn.send("OK".encode())
-        print("hsgfasygdfjksd")
-        print(data.decode())  # TODO handle /n
-        conn.send("END_EXECUTE".encode())
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
         # Change IP
-        conn.send("CHANGE_IP".encode())
-        data = conn.recv(2)  # ok for packgae
-        # send size of packet
-        packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
-        conn.send(str(len(packet_str)).encode())
-        data = conn.recv(2)  # ok for packgae
-        conn.send(packet_str.encode())
-        data = conn.recv(2)  # ok for packgae
+        while True: # TODO: timeout or scheduler
+            conn.send("CHANGE_IP".encode())
+            data = conn.recv(2)  # ok for packgae
+            # send size of packet
+            packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
+            conn.send(str(len(packet_str)).encode())
+            data = conn.recv(2)  # ok for packgae
+            conn.send(packet_str.encode())
+            data = conn.recv(2)  # ok for packgae
+            data = conn.recv(6)
+            if data.decode() == 'accept':
+                print(str(data))
+                break
+
 
 conn.close()

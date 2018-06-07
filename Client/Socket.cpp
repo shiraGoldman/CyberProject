@@ -35,7 +35,7 @@ void Socket::close(SOCKET socket)
 /**
 Connect to a host on a certain port number
 */
-bool Socket::conn(SOCKET socket)
+int Socket::conn(SOCKET socket)
 {
 	return connect(socket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
 }

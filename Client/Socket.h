@@ -25,7 +25,7 @@ public:
 	void freeAddrInfo();
 	SOCKET create();
 	void close(SOCKET);
-	bool conn(SOCKET);
+	int conn(SOCKET);
 	int send_data(SOCKET, const char*);
 	int receive(SOCKET, char*, int);
 };
