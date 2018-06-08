@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import socket
+from SocketManager import SocketManager
 
 # message Packet
 # {
@@ -31,9 +32,8 @@ def bin_file_to_buffer(file_path):
 
 
 if __name__ == '__main__':
-    TCP_IP = '192.168.43.49'
-    TCP_PORT = 5005
-    BUFFER_SIZE = 1024
+    TCP_IP = '127.0.0.1'
+    TCP_PORT = 5006
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
@@ -43,12 +43,10 @@ if __name__ == '__main__':
 
     print('Connection address:', addr)
     while 1:
-        data = conn.recv(BUFFER_SIZE)
+        data = SocketManager.receive(conn)
         if not data: break
         print('received data:', data)
-        data = data
-        conn.send(data)
-        data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        SocketManager.send_data(conn, data)
 
         # # UPDATE:
         # conn.send("UPDATE".encode())
@@ -91,17 +89,10 @@ if __name__ == '__main__':
         #         break
 
         # file system info
-        conn.send("FILE_SYSTEM_INFO".encode())
-        data = conn.recv(2)  # ok for packgae
-        conn.send(str(len(FILE_INFO_DIR)).encode())
-        data = conn.recv(2)  # ok for packgae
-        conn.send(FILE_INFO_DIR.encode())
-        data = conn.recv(2)  # ok for packgae
-        size = conn.recv(BUFFER_SIZE) # get response size
-        conn.send("OK".encode())
-        data = conn.recv(int(size))
-        conn.send("OK".encode())
-        print(data.decode())
+        SocketManager.send_data(conn, "FILE_SYSTEM_INFO")
+        SocketManager.send_data(conn, FILE_INFO_DIR)
+        data = SocketManager.receive(conn)
 
+        print(data)
 
 conn.close()
