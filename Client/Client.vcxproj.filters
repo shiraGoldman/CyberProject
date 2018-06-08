@@ -18,18 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Socket.cpp">
+    <ClCompile Include="WindowsSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsSocket.cpp">
+    <ClCompile Include="SocketManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Socket.h">
+    <ClInclude Include="WindowsSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsSocket.h">
+    <ClInclude Include="SocketManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

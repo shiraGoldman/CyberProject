@@ -6,6 +6,7 @@ C++ client example using sockets
 #include<iostream>    //cout
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <string>
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -14,13 +15,13 @@ C++ client example using sockets
 
 using namespace std;
 
-class Socket
+class SocketManager
 {
 private:
 	addrinfo* addrInfo;
 
 public:
-	Socket();
+	SocketManager();
 	void setAddrInfo(addrinfo*);
 	void freeAddrInfo();
 	SOCKET create();

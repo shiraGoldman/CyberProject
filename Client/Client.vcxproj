@@ -145,12 +145,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Socket.h" />
+    <ClInclude Include="SocketManager.h" />
     <ClInclude Include="WindowsSocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="SocketManager.cpp" />
     <ClCompile Include="WindowsSocket.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
