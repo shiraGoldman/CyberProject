@@ -107,30 +107,22 @@ void dirInfo(SocketManager socketManager, SOCKET socket)
 
 bool changeIp(SocketManager & socketManager, SOCKET & socket)
 {
-	//get size of packet
-	char sizeOfPacket[DEFAULT_BUFLEN];
-	int iResult, iResult2;
-	memset(sizeOfPacket, 0, DEFAULT_BUFLEN);
-	iResult = socketManager.receive(socket, sizeOfPacket, DEFAULT_BUFLEN);
-	iResult2 = socketManager.send_data(socket, "ok");//ok
-	int sizePacket = atoi(sizeOfPacket);
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
 
 	//get ip:port
-	char *packet = new char[sizePacket+1];
-	memset(packet, 0, sizePacket+1);
-	iResult = socketManager.receive(socket, packet, DEFAULT_BUFLEN);
-	iResult2 = socketManager.send_data(socket, "ok");//ok
-	char* ip = strtok(packet, ":");
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	char* ip = strtok(recvbuf, ":");
 	char* port = strtok(NULL, ":");
 
-	//try to connect to 
+	//try to connect to new server
 	SocketManager newsocketManager;
 	//WindowsSocket windowsSocket;
 	SOCKET newSocket = INVALID_SOCKET;
 
-	struct addrinfo *result = NULL, hints;
+	struct addrinfo *addrInfo = NULL, hints;
 	char *sendbuf = "this is a test14";
-	char recvbuf[DEFAULT_BUFLEN];
+	char recvbuf2[DEFAULT_BUFLEN];
 	//int iResult, iResult2;
 	int recvbuflen = DEFAULT_BUFLEN;
 
@@ -141,12 +133,12 @@ bool changeIp(SocketManager & socketManager, SOCKET & socket)
 	hints.ai_protocol = IPPROTO_TCP;
 
 	// Resolve the server address and port
-	iResult = getaddrinfo(ip, port, &hints, &result);
-	if (iResult != 0) {
-		throw new exception("getaddrinfo failed with error: %d\n", iResult);
+	result = getaddrinfo(ip, port, &hints, &addrInfo);
+	if (result != 0) {
+		throw new exception("getaddrinfo failed with error: %d\n", result);
 	}
 
-	newsocketManager.setAddrInfo(result);
+	newsocketManager.setAddrInfo(addrInfo);
 
 	// Attempt to connect to an address until one succeeds
 	int i = 0;
@@ -170,16 +162,16 @@ bool changeIp(SocketManager & socketManager, SOCKET & socket)
 		break;
 	}
 
-	freeaddrinfo(result);
+	freeaddrinfo(addrInfo);
 	if (connected)
 	{
-		iResult2 = socketManager.send_data(socket, "accept");
+		result = socketManager.send_data(socket, "accept");
 		socketManager.close(socket);
 		socketManager = newsocketManager;
 		socket = newSocket;
 	}
 
-	delete[] packet;
+	//delete[] recvbuf;
 	return connected;
 }
 

@@ -46,7 +46,7 @@ int SocketManager::conn(SOCKET socket)
 /**
 Send data to the connected host
 */
-int SocketManager::send_data(SOCKET socket, const char* message) // if success - returns 2 (bytes of OK)
+int SocketManager::send_data(SOCKET socket, const char* message) // TODO: change the fact that if success - returns 2 (bytes of OK)
 {
 	char *packetOK = new char[OK_PACKET_SIZE];
 	int result;
@@ -94,7 +94,7 @@ int SocketManager::send_data(SOCKET socket, const char* message) // if success -
 /**
 Receive data from the connected host
 */
-int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) // if success returns 2 - bytes of sent OK
+int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) // TODO: change the fact that if success returns 2 - bytes of sent OK
 {
 	int result;
 	
