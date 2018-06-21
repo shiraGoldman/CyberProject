@@ -1,15 +1,10 @@
 #include "stdafx.h"
 #include "DLL.h"
 
-//int newFunc(const char * format, ...)
-//{
-//	MessageBoxA(NULL, "hook called", "hehe", MB_OK);
-//	return 0;
-//}
-
-int WINAPI newFunc(HWND hwnd, LPCTSTR lptext, LPCTSTR lpCaption, UINT uType)
+int WINAPI newFunc(HWND hwnd, LPCSTR lptext, LPCSTR lpCaption, UINT uType)
 {
 	MessageBoxA(NULL, "hook called", "hehe", MB_OK);
+	MessageBoxA(hwnd, lptext, lpCaption, uType);
 	return 0;
 }
 
@@ -26,7 +21,7 @@ BOOL APIENTRY DllMain(HINSTANCE hInst, DWORD reason, LPVOID reserved)
 		break;
 	case DLL_PROCESS_DETACH:
 		MessageBox(NULL, L"dll main closed", L"hehe", MB_OK);
-		//IAThooking(GetModuleHandleA(NULL), TARGET_FUNCTION, (void *)sourceAddr);
+		dll.IAThooking(GetModuleHandleA(NULL), TARGET_FUNCTION, (void *)&(dll.sourceAddr));
 		break;
 	case DLL_THREAD_ATTACH:
 		break;
