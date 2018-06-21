@@ -600,13 +600,13 @@ int main()
 	//LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Documents\\PE\\HOOKING1\\notepad.exe"));
 	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
 
-	char* dllPath = "..\\Server\\IAT Hooking\\IATHookingDLL.dll";
+	char* dllPath = "C:\\Users\\admin\\Desktop\\CyberProject\\Server\\IAT Hooking\\IATHookingDLL.dll";
 
 
 	STARTUPINFO info = { sizeof(info) };
 	PROCESS_INFORMATION processInfo;
 	HANDLE hprocess = NULL;
-	hprocess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, 10740);
+	hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, 13996);
 	/*if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
 	{
 		hprocess = processInfo.hProcess;
@@ -634,7 +634,7 @@ int main()
 	HANDLE hthread = CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
 		LoadLibraryAtRemoteProcess, (LPVOID)dllPathRemoteAddress, NULL, NULL);
 
-	ResumeThread(hthread);
+	//ResumeThread(hthread);
 	//WaitForSingleObject(hthread, INFINITE);
 	CloseHandle(hprocess);
 	CloseHandle(hthread);
