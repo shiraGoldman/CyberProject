@@ -121,7 +121,7 @@ int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) /
 	char *packet = new char[sizePacket];
 	memset(packet, 0, sizePacket);
 
-	result = recv(socket, packet, sizePacket, 0);
+	int resultMessage = recv(socket, packet, sizePacket, 0);
 
 	if (result == 0)
 		throw new exception("Connection closed\n");
@@ -140,5 +140,5 @@ int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) /
 	memset(buffer, 0, bufferlen);
 	strncpy(buffer, packet, sizePacket);
 
-	return result;
+	return resultMessage;
 }
