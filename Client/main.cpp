@@ -548,15 +548,14 @@ int main2(int argc, char **argv)
 	}
 }
 
-
 int main()
 {
-	LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Desktop\\OS\\Hooking\\1\\notepad.exe"));
-	//LPSTR exePath = "C:\\Users\\admin\\Downloads\\NETSTAT.EXE";
+	//LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Documents\\PE\\HOOKING1\\notepad.exe"));
+	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
 
-	char* dllPath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\x64\\Debug\\IATHookingDLL.dll";
+	char* dllPath = "..\\Server\\IAT Hooking\\IATHookingDLL.dll";
 
-	
+
 	STARTUPINFO info = { sizeof(info) };
 	PROCESS_INFORMATION processInfo;
 	HANDLE hprocess = NULL;
@@ -584,5 +583,4 @@ int main()
 	WaitForSingleObject(processInfo.hProcess, INFINITE);
 	CloseHandle(processInfo.hProcess);
 	CloseHandle(processInfo.hThread);
-
 }

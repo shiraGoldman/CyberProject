@@ -4,12 +4,6 @@
 #define IAT_EXPORTS
 namespace IAT
 {
-	int IATDll::newFunc(FILE* stream, const char * format, ...)
-	{
-		MessageBoxA(NULL, "hook called", "hehe", MB_OK);
-		return 0;
-	}
-
 	bool IATDll::IAThooking(HMODULE hInstance, LPCSTR targetFunction, PVOID newFunc)
 	{
 		bool flag = false;
@@ -44,14 +38,6 @@ namespace IAT
 		return false;
 	}
 
-	//__declspec(naked) int newFunc()
-	//{
-	//	_asm {
-	//		XOR eax, eax;
-	//		RETN 8;
-	//	}
-	//}
-
 	PIMAGE_IMPORT_DESCRIPTOR IATDll::getImportTable(HMODULE hInstance)
 	{
 		PIMAGE_DOS_HEADER dosHeader;
@@ -66,6 +52,7 @@ namespace IAT
 		return (PIMAGE_IMPORT_DESCRIPTOR)((PBYTE)hInstance + dataDirectory.VirtualAddress);//ImageBase+RVA to import table
 
 	}
+
 	bool IATDll::rewriteThunk(PIMAGE_THUNK_DATA pThunk, void* newFunc)
 	{
 		DWORD CurrentProtect;

