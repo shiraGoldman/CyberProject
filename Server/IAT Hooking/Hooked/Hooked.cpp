@@ -6,8 +6,11 @@
 
 int main()
 {
-	Sleep(5000);
-	MessageBoxA(NULL, "original call", "hello", MB_OK);
+	while (true)
+	{
+		Sleep(5000);
+		MessageBoxA(NULL, "original call", "hello", MB_OK);
+	}
     return 0;
 }
 
