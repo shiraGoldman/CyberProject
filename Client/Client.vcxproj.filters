@@ -24,12 +24,18 @@
     <ClCompile Include="SocketManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KeyLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowsSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SocketManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

