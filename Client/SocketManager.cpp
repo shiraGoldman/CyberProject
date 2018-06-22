@@ -46,7 +46,7 @@ int SocketManager::conn(SOCKET socket)
 /**
 Send data to the connected host
 */
-int SocketManager::send_data(SOCKET socket, const char* message) // TODO: change the fact that if success - returns 2 (bytes of OK)
+int SocketManager::send_data(SOCKET socket, const char* message)
 {
 	char *packetOK = new char[OK_PACKET_SIZE];
 	int result;
@@ -73,8 +73,8 @@ int SocketManager::send_data(SOCKET socket, const char* message) // TODO: change
 
 
 	// send message
-	result = send(socket, message, (int)strlen(message), 0);
-	if (result == SOCKET_ERROR) {
+	int resultMessage  = send(socket, message, (int)strlen(message), 0);
+	if (resultMessage == SOCKET_ERROR) {
 		closesocket(socket); // TODO: need it? 
 		throw new exception("send failed with error: %d\n", GetLastError());
 		// WSACleanup()
@@ -88,13 +88,13 @@ int SocketManager::send_data(SOCKET socket, const char* message) // TODO: change
 	else if (result < 0)
 		throw new exception("recv failed with error: %d\n", WSAGetLastError());
 	
-	return result;
+	return resultMessage;
 }
 
 /**
 Receive data from the connected host
 */
-int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) // TODO: change the fact that if success returns 2 - bytes of sent OK
+int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen)
 {
 	int result;
 	
@@ -123,9 +123,9 @@ int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen) /
 
 	int resultMessage = recv(socket, packet, sizePacket, 0);
 
-	if (result == 0)
+	if (resultMessage == 0)
 		throw new exception("Connection closed\n");
-	else if (result < 0 )
+	else if (resultMessage < 0 )
 		throw new exception("recv failed with error: %d\n", WSAGetLastError());
 
 	// send OK for receive
