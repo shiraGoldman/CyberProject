@@ -1,6 +1,7 @@
 BUFFER_SIZE = 1050
 OK_PACKET_SIZE = 2
 
+
 class SocketManager:
     @staticmethod
     def send_data(conn, message):
@@ -11,7 +12,14 @@ class SocketManager:
         data = conn.recv(OK_PACKET_SIZE)
 
         # send message
-        conn.send(message.encode())
+        if isinstance(message, str):
+            conn.send(message.encode())
+
+        elif isinstance(message, bytes):
+            conn.send(message)
+
+        else:
+            raise ValueError("Unsupported type of data to send")
 
         # receive OK for message
         data = conn.recv(OK_PACKET_SIZE)

