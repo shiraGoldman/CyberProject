@@ -38,5 +38,6 @@ class SocketManager:
         # send OK for message
         conn.send("OK".encode())
 
-        data = data.decode()
+        if not isinstance(data, bytes):
+            data = data.decode()
         return data

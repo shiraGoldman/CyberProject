@@ -13,7 +13,7 @@
 using namespace std;
 
 #define DEFAULT_BUFLEN 1050
-#define DEFAULT_PORT "5007"
+#define DEFAULT_PORT "5009"
 #define DEFAULT_HOST "127.0.0.1"
 
 std::ofstream openFile(char *file_path)

