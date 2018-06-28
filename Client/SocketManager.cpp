@@ -138,7 +138,7 @@ int SocketManager::receive(SOCKET socket, char* buffer /*out*/, int bufferlen)
 
 	// save packet to buffer
 	memset(buffer, 0, bufferlen);
-	strncpy(buffer, packet, sizePacket);
+	memcpy(buffer, packet, sizePacket);
 
 	return resultMessage;
 }
