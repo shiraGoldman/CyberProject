@@ -294,14 +294,10 @@ void iatHooking(SocketManager & socketManager, SOCKET & socket)
 	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4); 
 	DWORD processID = atoi(recvbuf);
 
-	//get dll
-	//result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 400); // TODO: fix in server so that gets it in bytes
-
      //Create the dll in IAT Hooking\IATHooking.dll in Client PC
-	char * dllPath = "IAT Hooking\\IATHooking.dll";
+	char * dllPath = "C:\\Users\\admin\\Desktop\\IAT Hooking\\IATHooking.dll";
 	std::ofstream clientFile = openFile(dllPath);
-	//clientFile.write(recvbuf, result);
-	//clientFile.close();
+
 	do
 	{
 		result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
@@ -503,18 +499,18 @@ int main(int argc, char **argv)
 
 
 
-int mainIAT()
+int main123()
 {
 	//LPTSTR exePath = _tcsdup(TEXT("C:\\Users\\admin\\Documents\\PE\\HOOKING1\\notepad.exe"));
 	LPTSTR exePath = _tcsdup(TEXT("..\\Server\\IAT Hooking\\Hooked\\Debug\\Hooked.exe"));
-
-	char* dllPath = "C:\\Users\\admin\\Desktop\\CyberProject\\Server\\IAT Hooking\\IATHookingDLL.dll";
+	
+	char* dllPath = "C:\\Users\\admin\\Documents\\Project\\CyberProject\\Server\\IAT Hooking\\IATHookingDLL.dll";
 
 
 	STARTUPINFO info = { sizeof(info) };
 	PROCESS_INFORMATION processInfo;
 	HANDLE hprocess = NULL;
-	hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, 13996);
+	hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, 6812);
 	/*if (CreateProcess(NULL, exePath, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, (LPSTARTUPINFO)&info, &processInfo))
 	{
 		hprocess = processInfo.hProcess;
