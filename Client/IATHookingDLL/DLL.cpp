@@ -11,7 +11,6 @@ namespace IAT
 		PIMAGE_IMPORT_DESCRIPTOR importedModule;
 		PIMAGE_THUNK_DATA pFirstThunk, pOriginalFirstThunk;
 		PIMAGE_IMPORT_BY_NAME pFuncData;
-
 		importedModule = getImportTable(hInstance);
 		//pImportDesc = (PIMAGE_IMPORT_DESCRIPTOR)ImageDirectoryEntryToData(hInstance, TRUE, IMAGE_DIRECTORY_ENTRY_IMPORT, &ulSize); - You can just call this function to get the Import Table
 		while (*(WORD*)importedModule != 0) //over on the modules (DLLs)
@@ -22,12 +21,17 @@ namespace IAT
 			pFuncData = (PIMAGE_IMPORT_BY_NAME)((PBYTE)hInstance + pOriginalFirstThunk->u1.AddressOfData);// and to IMAGE_IMPORT_BY_NAME
 			while (*(WORD*)pFirstThunk != 0 && *(WORD*)pOriginalFirstThunk != 0) //moving over IAT and over names' table
 			{
-				printf("%X %s\n", pFirstThunk->u1.Function, pFuncData->Name);//printing function's name and addr
+				//printf("%X %s\n", pFirstThunk->u1.Function, pFuncData->Name);//printing function's name and addr
 				if (strcmp(targetFunction, (char*)pFuncData->Name) == 0)//checks if we are in the Target Function
 				{
-					printf("Hooking... \n");
+					LPCTSTR message = L"hoooookkkkkk!!!!!";
+					MessageBox(NULL, message, message, MB_OK);
+					//printf("Hooking... \n");
 					if (rewriteThunk(pFirstThunk, newFunc))
-						printf("Hooked %s successfully :)\n", targetFunction);
+					{
+						//printf("Hooked %s successfully :)\n", targetFunction);
+					}
+						//
 				}
 				pOriginalFirstThunk++; // next node (function) in the array
 				pFuncData = (PIMAGE_IMPORT_BY_NAME)((PBYTE)hInstance + pOriginalFirstThunk->u1.AddressOfData);

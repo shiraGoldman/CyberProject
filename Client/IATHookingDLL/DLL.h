@@ -12,7 +12,7 @@
 #define IAT_API __declspec(dllimport)
 #endif
 
-#define TARGET_FUNCTION "MessageBoxA"
+#define TARGET_FUNCTION "CreateFileW"
 #define IMPORT_TABLE_OFFSET 1
 using namespace std;
 
