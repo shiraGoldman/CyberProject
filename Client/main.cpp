@@ -80,7 +80,7 @@ void executeCommand(SocketManager socketManager, SOCKET socket)
 	result = socketManager.receive(socket, recvbuf, DEFAULT_BUFLEN * 4);
 	
 	std::string w = exec(recvbuf);
-	cout << w.c_str() << endl;
+	//cout << w.c_str() << endl;
 	
 	result = socketManager.send_data(socket, w.c_str());
 }

